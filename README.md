@@ -2,7 +2,7 @@
 
 A small, native Windows companion for keeping an eye on your remaining Codex quota. Built with **C# · .NET 8 · WPF** for **Windows 10/11 x64**.
 
-The floating circle stays above other windows while Codex is running. Click it for the detailed panel; drag it to move. The outer teal ring shows five-hour quota remaining, the inner purple ring shows weekly quota remaining, and the center shows the five-hour percentage. The system tray remains available when the circle is hidden.
+The floating circle stays above other windows while Codex is running. Click it for the detailed panel; drag it to move. The outer teal ring shows five-hour quota remaining, the inner purple ring shows weekly quota remaining, and the center shows the five-hour percentage. The circle shows only the percentage and rings, without a status caption. The rounded, neutral tray menu remains available when the circle is hidden.
 
 <img src="docs/images/widget.png" width="96" alt="Circular quota widget using synthetic preview data" />
 <img src="docs/images/details.png" width="420" alt="Detailed quota panel using synthetic preview data" />
@@ -13,12 +13,12 @@ Screenshots use clearly marked synthetic preview values, not account data.
 
 - Always-on-top circular widget with a clean circular edge and no clipped shadow; click or keyboard-activate to open details. Hold and drag anywhere on the circle to move it; the position is saved on release. Dragging never opens the details panel.
 - Borderless translucent panels with 40% desktop visibility, rounded glass cards, and light/dark palettes. A single 26-DIP clip keeps the background and content corners aligned; text and controls retain their own opacity.
-- Theme-aware system tray menu with quota summary, status, refresh, visibility toggle, settings, and quit; a clear status ring replaces the miniature double-ring icon.
+- Theme-aware system tray menu with aligned quota values, refresh, visibility toggle, settings, and quit; a clear status ring replaces the miniature double-ring icon.
 - By default the circle is visible only while a Codex process runs; tray-only and always-visible modes are configurable.
 - Five-hour and weekly **remaining** quota, used percentages, and reset countdowns.
 - Pace estimate comparing quota consumed with elapsed time in each reported window.
 - Local SQLite history, retained for **seven days**; chart leaves gaps across missing readings and resets.
-- Configurable warning and critical alerts, defaulting to **25%** and **10%** remaining. Rings and bars turn amber/red; exhausted quota keeps a full red outline and an EMPTY label. Persistent panel warnings remain visible even if Windows suppresses notifications.
+- Configurable warning and critical alerts, defaulting to **25%** and **10%** remaining. Rings and bars turn amber/red; exhausted quota keeps a full red outline at 0%. Persistent panel warnings remain visible even if Windows suppresses notifications.
 - Light, dark, and system appearance; remembered widget position. Settings replaces usage in the same frame with Back navigation. The panel chooses an available side of the circle and follows it when dragged; no widget hover tooltip.
 - Explicit LIVE, LOCAL, STALE, RESET DUE, and N/A states, plus last-reading timestamp and source details.
 - No API key, browser cookies, tracker telemetry, or prompt/response storage.

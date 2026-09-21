@@ -3,12 +3,9 @@
     <Button.Clip><EllipseGeometry Center="46,46" RadiusX="46" RadiusY="46"/></Button.Clip>
     <Button.Template><ControlTemplate TargetType="Button"><ContentPresenter/></ControlTemplate></Button.Template>
     <Grid Width="92" Height="92">
-      <Ellipse Fill="{DynamicResource GlassStrongBrush}" Stroke="{DynamicResource BorderBrush}" StrokeThickness="0.5"/>
+      <Ellipse Fill="{DynamicResource GlassStrongBrush}"/>
       <local:QuotaRing x:Name="Ring" Five="{Binding FiveValue}" Week="{Binding WeekValue}" FiveBrush="{Binding FiveBrush}" WeekBrush="{Binding WeekBrush}" FiveExhausted="{Binding FiveExhausted}" WeekExhausted="{Binding WeekExhausted}" Margin="3"/>
-      <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-        <TextBlock Text="{Binding FiveRemaining}" FontWeight="SemiBold" FontSize="20" HorizontalAlignment="Center"/>
-        <TextBlock Text="{Binding WidgetStatus}" FontSize="9" FontWeight="SemiBold" Foreground="{Binding OverallBrush}" HorizontalAlignment="Center"/>
-      </StackPanel>
+      <TextBlock Text="{Binding FiveRemaining}" FontWeight="Medium" FontSize="23" VerticalAlignment="Center" HorizontalAlignment="Center"/>
     </Grid>
   </Button>
 </Window>

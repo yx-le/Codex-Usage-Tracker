@@ -17,7 +17,7 @@ public sealed class TrackerController : IDisposable
     private readonly ResetRefreshSchedule resetRefresh = new();
     private string lastTrayState = "";
     private readonly Forms.ToolStripMenuItem trayQuota;
-    private readonly Forms.ToolStripMenuItem trayStatus;
+    private readonly Forms.ToolStripMenuItem trayWeek;
     private readonly Forms.ToolStripMenuItem trayFloating;
     private readonly Forms.NotifyIcon tray;
     private readonly DispatcherTimer timer;
@@ -38,17 +38,18 @@ public sealed class TrackerController : IDisposable
         repository = new UsageRepository(Path.Combine(dataDirectory, "usage.db"));
         widget = new WidgetWindow(this); details = new DetailsWindow(this);
         tray = new Forms.NotifyIcon { Text = "Codex Usage Tracker", Visible = true, Icon = Drawing.SystemIcons.Information };
-        var menu = new Forms.ContextMenuStrip
+        var menu = new RoundedTrayMenu
         {
             Renderer = new TrayMenuRenderer(), ShowImageMargin = false,
-            Font = new Drawing.Font("Segoe UI", 10), Padding = new Forms.Padding(6),
+            Font = new Drawing.Font("Segoe UI", 9), Padding = new Forms.Padding(8),
             MinimumSize = new Drawing.Size(260, 0)
         };
-        trayQuota = new Forms.ToolStripMenuItem("Codex quota", null, (_, _) => ShowDetails());
-        trayStatus = new Forms.ToolStripMenuItem("Connecting…") { Enabled = false };
-        menu.Items.Add(trayQuota); menu.Items.Add(trayStatus);
+        menu.Items.Add(new Forms.ToolStripMenuItem("Quota remaining") { Enabled = false });
+        trayQuota = new Forms.ToolStripMenuItem("5-hour", null, (_, _) => ShowDetails());
+        trayWeek = new Forms.ToolStripMenuItem("Weekly", null, (_, _) => ShowDetails());
+        menu.Items.Add(trayQuota); menu.Items.Add(trayWeek);
         menu.Items.Add(new Forms.ToolStripSeparator());
-        menu.Items.Add("Usage overview", null, (_, _) => ShowDetails());
+        menu.Items.Add("Open usage details", null, (_, _) => ShowDetails());
         menu.Items.Add("Refresh now", null, async (_, _) => await RefreshAsync());
         menu.Items.Add("Settings", null, (_, _) => ShowSettings());
         trayFloating = new Forms.ToolStripMenuItem("Hide floating circle", null, (_, _) =>
@@ -57,7 +58,7 @@ public sealed class TrackerController : IDisposable
         menu.Items.Add(new Forms.ToolStripSeparator());
         menu.Items.Add("Quit", null, (_, _) => Application.Current.Shutdown());
         tray.ContextMenuStrip = menu;
-        foreach (Forms.ToolStripItem item in menu.Items) item.Padding = new Forms.Padding(9, 7, 9, 7);
+        foreach (Forms.ToolStripItem item in menu.Items) item.Padding = item is Forms.ToolStripSeparator ? new Forms.Padding(0, 4, 0, 4) : new Forms.Padding(10, 5, 10, 5);
         menu.Opening += (_, _) => UpdateTrayMenu();
         tray.MouseClick += (_, e) => { if (e.Button == Forms.MouseButtons.Left) ToggleDetails(); };
         timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
@@ -165,11 +166,11 @@ public sealed class TrackerController : IDisposable
     }
     private void UpdateTrayMenu()
     {
-        trayQuota.Text = $"5h  {ViewModel.FiveRemaining}    ·    Week  {ViewModel.WeekRemaining}";
-        trayStatus.Text = $"{ViewModel.WidgetStatus}  ·  {ViewModel.Status}";
+        trayQuota.ShortcutKeyDisplayString = ViewModel.FiveRemaining;
+        trayWeek.ShortcutKeyDisplayString = ViewModel.WeekRemaining;
         trayFloating.Text = Settings.FloatingWidget ? "Hide floating circle" : "Show floating circle";
         if (tray.ContextMenuStrip is { } menu)
-        { menu.BackColor = TrayMenuRenderer.ColorFor("GlassStrongBrush"); menu.ForeColor = TrayMenuRenderer.ColorFor("TextBrush"); }
+        { menu.BackColor = TrayMenuRenderer.Background; menu.ForeColor = TrayMenuRenderer.Foreground; }
     }
     [DllImport("user32.dll")] [return: MarshalAs(UnmanagedType.Bool)] private static extern bool DestroyIcon(IntPtr handle);
     public void ToggleDetails() { if (details.IsVisible) details.Hide(); else ShowDetails(); }
