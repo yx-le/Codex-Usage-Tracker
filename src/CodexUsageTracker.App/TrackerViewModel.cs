@@ -9,6 +9,38 @@ public sealed class TrackerViewModel : INotifyPropertyChanged
     public bool Busy { get; set; }
     public bool CodexRunning { get; set; }
     public string StorageStatus { get; set; } = "";
+    public TrackerSettings Settings { get; set; } = new();
+    public QuotaStatus FiveStatus => QuotaStatusPolicy.Evaluate(Snapshot.FiveHour, Snapshot.IsStale(Now), Settings, Now);
+    public QuotaStatus WeekStatus => QuotaStatusPolicy.Evaluate(Snapshot.Weekly, Snapshot.IsStale(Now), Settings, Now);
+    public QuotaStatus OverallStatus => (QuotaStatus)Math.Max((int)FiveStatus, (int)WeekStatus);
+    public Brush FiveBrush => StatusBrush(FiveStatus, "AccentBrush");
+    public Brush WeekBrush => StatusBrush(WeekStatus, "WeekBrush");
+    public Brush OverallBrush => StatusBrush(OverallStatus, "AccentBrush");
+    public bool FiveExhausted => FiveStatus == QuotaStatus.Exhausted;
+    public bool WeekExhausted => WeekStatus == QuotaStatus.Exhausted;
+    public Brush FiveTrackBrush => FiveExhausted ? FiveBrush : (Brush)Application.Current.FindResource("TrackBrush");
+    public Brush WeekTrackBrush => WeekExhausted ? WeekBrush : (Brush)Application.Current.FindResource("TrackBrush");
+    public string WidgetStatus => OverallStatus switch
+    {
+        QuotaStatus.Exhausted => "EMPTY", QuotaStatus.Critical => "CRITICAL", QuotaStatus.Warning => "LOW",
+        QuotaStatus.ResetDue => "RESET", QuotaStatus.Stale => "STALE", _ => Status
+    };
+    public string WarningText => string.Join("\n", new[] { WarningFor("5-hour", FiveStatus, Snapshot.FiveHour), WarningFor("Weekly", WeekStatus, Snapshot.Weekly) }.Where(value => value.Length > 0));
+    public Visibility WarningVisibility => WarningText.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
+    public bool CanRefresh => !Busy;
+    private static string WarningFor(string label, QuotaStatus status, QuotaWindow? quota) => status switch
+    {
+        QuotaStatus.Exhausted => $"{label} quota exhausted · waiting for reset",
+        QuotaStatus.Critical => $"{label} quota critical · {quota!.RemainingPercent:0}% remaining",
+        QuotaStatus.Warning => $"{label} quota low · {quota!.RemainingPercent:0}% remaining",
+        QuotaStatus.ResetDue => $"{label} reset due · checking for fresh quota", _ => ""
+    };
+    private static Brush StatusBrush(QuotaStatus status, string healthy) => (Brush)Application.Current.FindResource(status switch
+    {
+        QuotaStatus.Exhausted or QuotaStatus.Critical => "CriticalBrush",
+        QuotaStatus.Warning => "WarningBrush",
+        QuotaStatus.Unknown or QuotaStatus.Stale or QuotaStatus.ResetDue => "MutedBrush", _ => healthy
+    });
     private DateTimeOffset Now => DateTimeOffset.UtcNow;
     private bool Valid(QuotaWindow? window) => window is not null && !window.HasExpired(Now);
     public string FiveRemaining => Valid(Snapshot.FiveHour) ? $"{Snapshot.FiveHour!.RemainingPercent:0}%" : "N/A";
@@ -25,7 +57,6 @@ public sealed class TrackerViewModel : INotifyPropertyChanged
     public string LastUpdated => !Snapshot.HasData ? "No quota reading yet" : $"Last reading {Snapshot.ObservedAt.ToLocalTime():ddd HH:mm:ss} · {(int)Math.Max(0, (Now - Snapshot.ObservedAt).TotalMinutes)}m ago";
     public string Connection => CodexRunning ? "Codex is running" : "Codex is not running";
     public string RefreshLabel => Busy ? "Updating…" : "Refresh";
-    public string WidgetTooltip => $"Codex · 5-hour {FiveRemaining} · weekly {WeekRemaining} remaining\n{Status} · {LastUpdated}\nClick for details · drag to move";
     public event PropertyChangedEventHandler? PropertyChanged;
     public void Notify() => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(null));
 }

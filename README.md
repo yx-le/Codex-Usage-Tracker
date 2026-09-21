@@ -13,13 +13,13 @@ Screenshots use clearly marked synthetic preview values, not account data.
 
 - Always-on-top circular widget with a clean circular edge and no clipped shadow; click or keyboard-activate to open details. Hold and drag anywhere on the circle to move it; the position is saved on release. Dragging never opens the details panel.
 - Borderless translucent panels with 40% desktop visibility, rounded glass cards, and light/dark palettes. A single 26-DIP clip keeps the background and content corners aligned; text and controls retain their own opacity.
-- System tray icon with quota rings, remaining quota tooltip, refresh, settings, and quit.
+- Theme-aware system tray menu with quota summary, status, refresh, visibility toggle, settings, and quit; a clear status ring replaces the miniature double-ring icon.
 - By default the circle is visible only while a Codex process runs; tray-only and always-visible modes are configurable.
 - Five-hour and weekly **remaining** quota, used percentages, and reset countdowns.
 - Pace estimate comparing quota consumed with elapsed time in each reported window.
 - Local SQLite history, retained for **seven days**; chart leaves gaps across missing readings and resets.
-- Configurable warning and critical alerts, defaulting to **25%** and **10%** remaining.
-- Light, dark, and system appearance; remembered widget position.
+- Configurable warning and critical alerts, defaulting to **25%** and **10%** remaining. Rings and bars turn amber/red; exhausted quota keeps a full red outline and an EMPTY label. Persistent panel warnings remain visible even if Windows suppresses notifications.
+- Light, dark, and system appearance; remembered widget position. Settings replaces usage in the same frame with Back navigation. The panel chooses an available side of the circle and follows it when dragged; no widget hover tooltip.
 - Explicit LIVE, LOCAL, STALE, RESET DUE, and N/A states, plus last-reading timestamp and source details.
 - No API key, browser cookies, tracker telemetry, or prompt/response storage.
 
@@ -29,7 +29,7 @@ Extract the Windows portable package and open **CodexUsageTracker.exe**. The sel
 
 Sign in to Codex normally. The tracker uses Codex's existing sign-in through its app-server; it never reads or copies the credential files itself. If automatic executable discovery fails, select `codex.exe` in **Settings**.
 
-Click the tray icon or the floating circle to open the panel. Escape or the panel's close button collapses it. Use **Quit** in the tray menu to exit the app. The circle uses a fixed 96-DIP footprint and follows Windows DPI scaling. Windows may initially place the tray icon in its overflow area.
+Click the tray icon or the floating circle to open the panel. Escape returns from Settings to usage; otherwise Escape or the panel's close button collapses it. Use **Quit** in the tray menu to exit the app. The circle uses a fixed 96-DIP footprint and follows Windows DPI scaling. Windows may initially place the tray icon in its overflow area.
 
 To start the tracker at Windows sign-in, optionally place a shortcut to the portable executable in the current user's Startup folder (`shell:startup`). Autostart is not enabled automatically.
 
@@ -74,7 +74,7 @@ Use `Light` for the second theme. The preview creates isolated temporary setting
 
 The multi-bucket response's `codex` entry takes precedence. Other model-specific buckets are not substituted. Durations must explicitly match 300 or 10,080 minutes; unsupported or missing durations remain N/A. Missing reset times remain unknown. A past reset becomes “Reset due · awaiting update,” not an assumed quota refill.
 
-Quota refresh runs every 60 seconds while Codex runs; the countdown updates every second. Manual refresh works from the tray or panel. Data older than three minutes is STALE. Local fallback is always labelled cached/local. Low-quota alerts only use fresh app-server readings and are deduplicated per threshold and reset window during the running session. Restarting the tracker can repeat a still-applicable warning. Windows notification settings may suppress tray balloons.
+Quota refresh runs every 60 seconds while Codex runs; the countdown updates every second. A known reset triggers an immediate refresh, with a 15-second retry followed by 60-second retries if the source still reports the expired window. Reads never overlap and an expired reading never implies a refill. Manual refresh works from the tray or panel. Data older than three minutes is STALE. Local fallback is always labelled cached/local. Low-quota alerts only use fresh app-server readings and are deduplicated per threshold and reset window during the running session. Restarting the tracker can repeat a still-applicable warning. Windows notification settings may suppress tray balloons.
 
 The pace estimate extrapolates the window-average usage rate. “Above sustainable pace” means projected consumption exceeds 105% of the quota by reset, allowing a small tolerance. It is unavailable for stale, expired, or unknown-reset data and says “Learning pace” during the first five minutes. It is advisory; it cannot predict future work.
 
@@ -102,7 +102,7 @@ docs/                       Architecture and synthetic UI previews
 
 ## Validation and limitations
 
-The implementation was compiled and tested on Windows 11 x64 with .NET SDK 8.0.425. Twenty-seven automated tests cover bucket selection, unknown/malformed fields, stale readings, countdown boundaries, alert deduplication, local fallback, SQLite retention, settings recovery, and click/drag handling at different display scales. Live app-server retrieval was verified with an existing Codex sign-in. Both themes and the settings panel are rendered for visual checks; widget pixels outside the circular edge are verified transparent. Windows 10 compatibility is targeted but has not been tested on a separate Windows 10 machine.
+The implementation was compiled and tested on Windows 11 x64 with .NET SDK 8.0.425. Forty-one automated tests cover bucket selection, unknown/malformed fields, stale readings, countdown boundaries, alert deduplication, local fallback, SQLite retention, settings recovery, click/drag handling at different display scales, quota status thresholds, non-overlapping panel placement, and reset refresh retries. Live app-server retrieval was verified with an existing Codex sign-in. Both themes and the settings panel are rendered for visual checks; widget pixels outside the circular edge are verified transparent. Windows 10 compatibility is targeted but has not been tested on a separate Windows 10 machine.
 
 Codex process detection recognizes `codex.exe` (desktop app-server or CLI). The tracker's own temporary quota child is excluded from visibility decisions while it is reading. A background Codex process counts as running even if its main window is closed. There is no taskbar injection, browser scraping, automatic update service, or usage prediction based on token pricing. This is an independent utility, not an official OpenAI product.
 

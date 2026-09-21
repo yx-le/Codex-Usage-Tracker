@@ -1,15 +1,13 @@
-<Window x:Class="CodexUsageTracker.App.SettingsWindow"
+<UserControl x:Class="CodexUsageTracker.App.SettingsPage"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Tracker settings" Width="440" Height="720" ResizeMode="NoResize"
-        WindowStyle="None" AllowsTransparency="True" Background="{DynamicResource BackgroundBrush}"
-        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
-  <Border Background="{DynamicResource GlassBrush}" CornerRadius="26">
+        Background="Transparent">
+  <Border Background="Transparent">
     <Grid>
       <Grid.RowDefinitions><RowDefinition Height="48"/><RowDefinition/></Grid.RowDefinitions>
       <Grid Background="Transparent" MouseLeftButtonDown="DragWindow">
         <TextBlock Text="Settings" Margin="22,0,0,0" VerticalAlignment="Center" FontSize="16" FontWeight="SemiBold"/>
-        <Button Content="×" Click="Cancel" ToolTip="Close settings" AutomationProperties.Name="Close settings" HorizontalAlignment="Right" Width="34" Height="34" Margin="0,7,8,7" Padding="0" Background="Transparent" FontSize="22" FontWeight="Light"/>
+        <Button Content="← Back" Click="Cancel" AutomationProperties.Name="Back to usage" HorizontalAlignment="Right" Height="34" Margin="0,7,12,7" Background="Transparent"/>
       </Grid>
       <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,7,0">
         <StackPanel Margin="22,8,15,22">
@@ -36,9 +34,9 @@
           <TextBlock Text="Quota readings stay on this PC for 7 days. No telemetry, browser cookies, prompts, or responses are stored." TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" FontSize="11" Margin="0,7,0,0"/>
           <Button Content="Clear local history" Click="ClearHistory" HorizontalAlignment="Left" Margin="0,10,0,0"/>
           <TextBlock x:Name="Validation" Foreground="{DynamicResource DangerBrush}" TextWrapping="Wrap" Margin="0,10,0,0"/>
-          <Button Content="Save settings" Click="Save" Margin="0,14,0,0" Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentTextBrush}" FontWeight="SemiBold"/>
+          <Button Click="Save" Margin="0,14,0,0" Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentTextBrush}" FontWeight="SemiBold"><TextBlock Text="Save settings" Foreground="{DynamicResource AccentTextBrush}"/></Button>
         </StackPanel>
       </ScrollViewer>
     </Grid>
   </Border>
-</Window>
+</UserControl>

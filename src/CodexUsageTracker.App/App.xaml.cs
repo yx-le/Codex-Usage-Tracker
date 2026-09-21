@@ -50,6 +50,8 @@ public partial class App : Application
             : new[] { "#00F5F9FC", "#99EEF5F8", "#F7FFFFFF", "#CCFFFFFF", "#EFFFFFFF", "#E5DCEAF0", "#FF102938", "#FF213C4B", "#526F8795", "#426D8795", "#FF007F68", "#FFFFFFFF", "#FF515EBD", "#FFC56016" };
         var keys = new[] { "BackgroundBrush", "GlassBrush", "GlassStrongBrush", "CardBrush", "InputBrush", "ButtonHoverBrush", "TextBrush", "MutedBrush", "BorderBrush", "TrackBrush", "AccentBrush", "AccentTextBrush", "WeekBrush", "DangerBrush" };
         for (var i = 0; i < keys.Length; i++) Current.Resources[keys[i]] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(palette[i]));
+        Current.Resources["WarningBrush"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(dark ? "#FFC05C" : "#974B00"));
+        Current.Resources["CriticalBrush"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(dark ? "#FF718C" : "#AE1638"));
     }
 
     protected override void OnExit(ExitEventArgs e)

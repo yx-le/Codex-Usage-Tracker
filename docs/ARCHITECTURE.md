@@ -9,3 +9,5 @@
 Theme brushes are dynamic WPF resources; custom rings and chart repaint with current brushes. The application is single-instance per Windows session. It runs at ordinary user privilege and keeps its history outside the repository.
 
 Tests deliberately exercise failure semantics: wrong quota bucket, absent duration, expired reset, stale/future timestamps, duplicate notifications, partial JSONL records, seven-day pruning, missing windows, and corrupt preferences. The optional `--render-preview` mode renders real WPF windows using synthetic readings and an isolated data directory; it caught a WPF default two-way progress binding during initial validation.
+
+Settings is a UserControl hosted in DetailsWindow; navigation switches content instead of opening an overlapping window. PanelPlacement chooses free space around the widget. QuotaStatusPolicy supplies persistent warning colors, while ResetRefreshSchedule detects due reset timestamps and limits retries. The preview validates same-window navigation and renders warning, critical, exhausted, and tray states in both themes.

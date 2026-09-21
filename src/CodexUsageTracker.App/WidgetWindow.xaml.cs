@@ -39,6 +39,7 @@ public partial class WidgetWindow : Window
         var point = PointToScreen(e.GetPosition(this));
         if (gesture.Move(point.X, point.Y) is not { } position) return;
         Left = position.Left; Top = position.Top;
+        controller.RepositionPanel();
     }
     private void PointerUp(object sender, MouseButtonEventArgs e)
     {

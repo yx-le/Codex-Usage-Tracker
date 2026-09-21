@@ -3,25 +3,24 @@ using System.Windows.Input;
 
 namespace CodexUsageTracker.App;
 
-public partial class SettingsWindow : Window
+public partial class SettingsPage : UserControl
 {
     private readonly TrackerController controller;
-    public SettingsWindow(TrackerController controller)
+    public SettingsPage(TrackerController controller)
     {
         InitializeComponent(); this.controller = controller;
-        GlassWindow.Enable(this, () => App.IsDarkTheme(controller.Settings.Theme));
         var settings = controller.Settings;
         OnlyRunning.IsChecked = settings.OnlyWhileCodexRunning; Floating.IsChecked = settings.FloatingWidget;
         Alerts.IsChecked = settings.AlertsEnabled; Warning.Text = settings.WarningPercent.ToString(); Critical.Text = settings.CriticalPercent.ToString();
         ThemeChoice.SelectedIndex = settings.Theme == "Light" ? 1 : settings.Theme == "Dark" ? 2 : 0;
         Executable.Text = settings.CodexExecutable;
     }
-    private void Cancel(object sender, RoutedEventArgs e) => DialogResult = false;
-    private void DragWindow(object sender, MouseButtonEventArgs e) { if (e.LeftButton == MouseButtonState.Pressed) DragMove(); }
+    private void Cancel(object sender, RoutedEventArgs e) => controller.ShowUsagePage();
+    private void DragWindow(object sender, MouseButtonEventArgs e) { if (e.LeftButton == MouseButtonState.Pressed) Window.GetWindow(this)?.DragMove(); }
     private void Browse(object sender, RoutedEventArgs e)
     {
         var dialog = new OpenFileDialog { Filter = "Codex executable (codex.exe)|codex.exe", CheckFileExists = true };
-        if (dialog.ShowDialog(this) == true) Executable.Text = dialog.FileName;
+        if (dialog.ShowDialog(Window.GetWindow(this)) == true) Executable.Text = dialog.FileName;
     }
     private void Save(object sender, RoutedEventArgs e)
     {
@@ -34,7 +33,7 @@ public partial class SettingsWindow : Window
         settings.OnlyWhileCodexRunning = OnlyRunning.IsChecked == true; settings.FloatingWidget = Floating.IsChecked == true;
         settings.AlertsEnabled = Alerts.IsChecked == true; settings.WarningPercent = warning; settings.CriticalPercent = critical;
         settings.Theme = ((ComboBoxItem)ThemeChoice.SelectedItem).Content.ToString()!; settings.CodexExecutable = executable;
-        controller.SaveSettings(); DialogResult = true;
+        controller.SaveSettings(); controller.ShowUsagePage();
     }
     private void ClearHistory(object sender, RoutedEventArgs e)
     {

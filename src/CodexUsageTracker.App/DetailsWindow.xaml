@@ -2,17 +2,18 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:CodexUsageTracker.App"
-        Title="Codex Usage Tracker" Width="420" Height="760" MinWidth="380" MinHeight="520"
+        Title="Codex Usage Tracker" Width="420" Height="790"
         WindowStyle="None" ResizeMode="NoResize" AllowsTransparency="True"
         Background="{DynamicResource BackgroundBrush}" ShowInTaskbar="False" Topmost="True"
         KeyDown="OnKeyDown">
   <Border Background="{DynamicResource GlassBrush}" CornerRadius="26">
     <Grid>
-      <Grid.RowDefinitions><RowDefinition Height="44"/><RowDefinition/></Grid.RowDefinitions>
+    <Grid x:Name="UsagePage">
+      <Grid.RowDefinitions><RowDefinition Height="44"/><RowDefinition/><RowDefinition Height="54"/></Grid.RowDefinitions>
       <Grid Grid.Row="0" Background="Transparent" MouseLeftButtonDown="DragWindow">
         <Border HorizontalAlignment="Left" VerticalAlignment="Center" Margin="18,0,0,0" Background="{DynamicResource CardBrush}" CornerRadius="12" Padding="9,4">
           <StackPanel Orientation="Horizontal">
-            <Ellipse Width="6" Height="6" Fill="{DynamicResource AccentBrush}" Margin="0,0,6,0"/>
+            <Ellipse Width="6" Height="6" Fill="{Binding OverallBrush}" Margin="0,0,6,0"/>
             <TextBlock Text="{Binding Status}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center"/>
           </StackPanel>
         </Border>
@@ -25,22 +26,25 @@
               <TextBlock Text="Quota remaining" FontSize="25" FontWeight="SemiBold"/>
               <TextBlock Text="Live limits and reset timing" Foreground="{DynamicResource MutedBrush}" Margin="0,3,0,0"/>
             </StackPanel>
-            <Button Content="↻" ToolTip="Refresh now" AutomationProperties.Name="Refresh quota" Click="Refresh" Width="38" Height="38" Padding="0" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="19" Background="{DynamicResource CardBrush}"/>
+            <Button Content="↻" IsEnabled="{Binding CanRefresh}" ToolTip="{Binding RefreshLabel}" AutomationProperties.Name="Refresh quota" Click="Refresh" Width="38" Height="38" Padding="0" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="19" Background="{DynamicResource CardBrush}"/>
           </DockPanel>
+          <Border Visibility="{Binding WarningVisibility}" Background="{DynamicResource CardBrush}" CornerRadius="12" Padding="12,9" Margin="0,0,0,12">
+            <TextBlock Text="{Binding WarningText}" Foreground="{Binding OverallBrush}" TextWrapping="Wrap" FontWeight="SemiBold" FontSize="12"/>
+          </Border>
           <Border Background="{DynamicResource CardBrush}" CornerRadius="20" Padding="16" Margin="0,0,0,12">
             <StackPanel>
               <DockPanel><TextBlock Text="5-HOUR" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource MutedBrush}"/><TextBlock Text="{Binding FiveUsed}" HorizontalAlignment="Right" FontSize="11" Foreground="{DynamicResource MutedBrush}"/></DockPanel>
               <StackPanel Orientation="Horizontal" Margin="0,5,0,10"><TextBlock Text="{Binding FiveRemaining}" FontSize="38" FontWeight="SemiBold"/><TextBlock Text="remaining" Margin="8,0,0,8" VerticalAlignment="Bottom" Foreground="{DynamicResource MutedBrush}"/></StackPanel>
-              <ProgressBar Value="{Binding FiveValue, Mode=OneWay}" Maximum="100" Height="6" BorderThickness="0" Background="{DynamicResource TrackBrush}" Foreground="{DynamicResource AccentBrush}"/>
-              <DockPanel Margin="0,11,0,0"><TextBlock Text="{Binding FiveReset}"/><TextBlock Text="{Binding FivePace}" HorizontalAlignment="Right" FontSize="11" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center"/></DockPanel>
+              <ProgressBar Value="{Binding FiveValue, Mode=OneWay}" Maximum="100" Height="6" BorderThickness="0" Background="{Binding FiveTrackBrush}" Foreground="{Binding FiveBrush}"/>
+              <StackPanel Margin="0,11,0,0"><TextBlock Text="{Binding FiveReset}"/><TextBlock Text="{Binding FivePace}" Margin="0,4,0,0" FontSize="11" Foreground="{DynamicResource MutedBrush}"/></StackPanel>
             </StackPanel>
           </Border>
           <Border Background="{DynamicResource CardBrush}" CornerRadius="20" Padding="16" Margin="0,0,0,18">
             <StackPanel>
               <DockPanel><TextBlock Text="WEEKLY" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource MutedBrush}"/><TextBlock Text="{Binding WeekUsed}" HorizontalAlignment="Right" FontSize="11" Foreground="{DynamicResource MutedBrush}"/></DockPanel>
               <StackPanel Orientation="Horizontal" Margin="0,5,0,10"><TextBlock Text="{Binding WeekRemaining}" FontSize="38" FontWeight="SemiBold"/><TextBlock Text="remaining" Margin="8,0,0,8" VerticalAlignment="Bottom" Foreground="{DynamicResource MutedBrush}"/></StackPanel>
-              <ProgressBar Value="{Binding WeekValue, Mode=OneWay}" Maximum="100" Height="6" BorderThickness="0" Background="{DynamicResource TrackBrush}" Foreground="{DynamicResource WeekBrush}"/>
-              <DockPanel Margin="0,11,0,0"><TextBlock Text="{Binding WeekReset}"/><TextBlock Text="{Binding WeekPace}" HorizontalAlignment="Right" FontSize="11" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center"/></DockPanel>
+              <ProgressBar Value="{Binding WeekValue, Mode=OneWay}" Maximum="100" Height="6" BorderThickness="0" Background="{Binding WeekTrackBrush}" Foreground="{Binding WeekBrush}"/>
+              <StackPanel Margin="0,11,0,0"><TextBlock Text="{Binding WeekReset}"/><TextBlock Text="{Binding WeekPace}" Margin="0,4,0,0" FontSize="11" Foreground="{DynamicResource MutedBrush}"/></StackPanel>
             </StackPanel>
           </Border>
           <DockPanel><TextBlock Text="LAST 7 DAYS" FontSize="11" FontWeight="SemiBold"/><TextBlock Text="Remaining %" HorizontalAlignment="Right" Foreground="{DynamicResource MutedBrush}" FontSize="11"/></DockPanel>
@@ -54,9 +58,11 @@
               <TextBlock Text="{Binding StorageStatus}" TextWrapping="Wrap" Foreground="{DynamicResource DangerBrush}" FontSize="10"/>
             </StackPanel>
           </Border>
-          <Button Content="Settings" Click="Settings" Margin="0,12,0,0"/>
         </StackPanel>
       </ScrollViewer>
+      <Button Grid.Row="2" Content="Settings" Click="Settings" Margin="22,4,22,14"/>
+    </Grid>
+    <ContentControl x:Name="SettingsHost" Visibility="Collapsed"/>
     </Grid>
   </Border>
 </Window>
