@@ -2,7 +2,9 @@
   <Button ToolTip="{Binding WidgetTooltip}" Click="OpenDetails" AutomationProperties.Name="Open Codex quota details" Padding="0" Background="Transparent" BorderBrush="Transparent">
     <Button.Template><ControlTemplate TargetType="Button"><ContentPresenter/></ControlTemplate></Button.Template>
     <Grid Width="92" Height="92">
-      <Ellipse Fill="{DynamicResource BackgroundBrush}" Stroke="{DynamicResource BorderBrush}"/>
+      <Ellipse Fill="{DynamicResource GlassStrongBrush}">
+        <Ellipse.Effect><DropShadowEffect BlurRadius="20" ShadowDepth="5" Opacity="0.38" Color="#000000"/></Ellipse.Effect>
+      </Ellipse>
       <local:QuotaRing x:Name="Ring" Five="{Binding FiveValue}" Week="{Binding WeekValue}" Margin="3"/>
       <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
         <TextBlock Text="{Binding FiveRemaining}" FontWeight="SemiBold" FontSize="20" HorizontalAlignment="Center"/>

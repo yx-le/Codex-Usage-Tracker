@@ -12,6 +12,7 @@ Screenshots use clearly marked synthetic preview values, not account data.
 ## Features
 
 - Always-on-top circular widget; click or keyboard-activate to open details; drag to move.
+- Borderless acrylic-style panels with a native Windows backdrop, rounded glass cards, and high-contrast light/dark palettes.
 - System tray icon with quota rings, remaining quota tooltip, refresh, settings, and quit.
 - By default the circle is visible only while a Codex process runs; tray-only and always-visible modes are configurable.
 - Five-hour and weekly **remaining** quota, used percentages, and reset countdowns.

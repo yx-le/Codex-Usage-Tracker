@@ -135,7 +135,7 @@ public sealed class TrackerController : IDisposable
     public void ShowSettings() { var dialog = new SettingsWindow(this); if (details.IsVisible) dialog.Owner = details; dialog.ShowDialog(); }
     public void SaveSettings()
     {
-        try { Settings.Save(settingsPath); App.ApplyTheme(Settings.Theme); widget.Ring.InvalidateVisual(); details.Chart.InvalidateVisual(); ViewModel.Notify(); }
+        try { Settings.Save(settingsPath); App.ApplyTheme(Settings.Theme); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme)); widget.Ring.InvalidateVisual(); details.Chart.InvalidateVisual(); ViewModel.Notify(); }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException) { MessageBox.Show("Settings could not be saved. Check folder access.", "Codex Usage Tracker"); }
     }
     public void ClearHistory() { repository.Clear(); UpdateHistory(); }
@@ -144,7 +144,7 @@ public sealed class TrackerController : IDisposable
         try { details.SetHistory(repository.ReadHistory(DateTimeOffset.UtcNow)); }
         catch (Microsoft.Data.Sqlite.SqliteException) { ViewModel.StorageStatus = "History is temporarily unavailable."; }
     }
-    private void OnSystemPreferenceChanged(object sender, UserPreferenceChangedEventArgs e) => Application.Current.Dispatcher.BeginInvoke(() => { App.ApplyTheme(Settings.Theme); widget.Ring.InvalidateVisual(); details.Chart.InvalidateVisual(); });
+    private void OnSystemPreferenceChanged(object sender, UserPreferenceChangedEventArgs e) => Application.Current.Dispatcher.BeginInvoke(() => { App.ApplyTheme(Settings.Theme); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme)); widget.Ring.InvalidateVisual(); details.Chart.InvalidateVisual(); });
     private void OnDisplayChanged(object? sender, EventArgs e) => Application.Current.Dispatcher.BeginInvoke(widget.ClampPosition);
 
     public void RenderPreview(string directory, string theme = "Dark")

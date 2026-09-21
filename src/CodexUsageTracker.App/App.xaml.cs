@@ -39,13 +39,16 @@ public partial class App : Application
         }
     }
 
+    public static bool IsDarkTheme(string choice) => choice == "Dark" ||
+        (choice == "System" && (int?)Registry.GetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "AppsUseLightTheme", 1) == 0);
+
     public static void ApplyTheme(string choice)
     {
-        var dark = choice == "Dark" || (choice == "System" && (int?)Registry.GetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "AppsUseLightTheme", 1) == 0);
+        var dark = IsDarkTheme(choice);
         var palette = dark
-            ? new[] { "#111B24", "#1A2833", "#F0F5F7", "#A5B5C2", "#30424F", "#4AD9B3", "#99ACFF" }
-            : new[] { "#F5F8FA", "#FFFFFF", "#142C3B", "#526A7A", "#DAE4EA", "#087D63", "#5262BC" };
-        var keys = new[] { "BackgroundBrush", "CardBrush", "TextBrush", "MutedBrush", "BorderBrush", "AccentBrush", "WeekBrush" };
+            ? new[] { "#00111820", "#D9141E28", "#F21A2631", "#80283A47", "#D923313D", "#B53A4D5A", "#FFF7FAFC", "#FFB8C5CE", "#597B8D99", "#52637682", "#FF62E8C1", "#FF071A17", "#FFA8B7FF", "#FFFFB36B" }
+            : new[] { "#00F5F9FC", "#D9EEF5F8", "#F7FFFFFF", "#BFFFFFFF", "#EFFFFFFF", "#E5DCEAF0", "#FF102938", "#FF405766", "#526F8795", "#426D8795", "#FF007F68", "#FFFFFFFF", "#FF515EBD", "#FFC56016" };
+        var keys = new[] { "BackgroundBrush", "GlassBrush", "GlassStrongBrush", "CardBrush", "InputBrush", "ButtonHoverBrush", "TextBrush", "MutedBrush", "BorderBrush", "TrackBrush", "AccentBrush", "AccentTextBrush", "WeekBrush", "DangerBrush" };
         for (var i = 0; i < keys.Length; i++) Current.Resources[keys[i]] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(palette[i]));
     }
 
