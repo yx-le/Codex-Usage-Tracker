@@ -1,13 +1,13 @@
 <Application x:Class="CodexUsageTracker.App.App" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" ShutdownMode="OnExplicitShutdown">
   <Application.Resources>
     <SolidColorBrush x:Key="BackgroundBrush" Color="#00111820"/>
-    <SolidColorBrush x:Key="GlassBrush" Color="#D9141E28"/>
-    <SolidColorBrush x:Key="GlassStrongBrush" Color="#F21A2631"/>
-    <SolidColorBrush x:Key="CardBrush" Color="#80283A47"/>
+    <SolidColorBrush x:Key="GlassBrush" Color="#99141E28"/>
+    <SolidColorBrush x:Key="GlassStrongBrush" Color="#E61A2631"/>
+    <SolidColorBrush x:Key="CardBrush" Color="#CC283A47"/>
     <SolidColorBrush x:Key="InputBrush" Color="#D923313D"/>
     <SolidColorBrush x:Key="ButtonHoverBrush" Color="#B53A4D5A"/>
     <SolidColorBrush x:Key="TextBrush" Color="#FFF7FAFC"/>
-    <SolidColorBrush x:Key="MutedBrush" Color="#FFB8C5CE"/>
+    <SolidColorBrush x:Key="MutedBrush" Color="#FFEAF1F6"/>
     <SolidColorBrush x:Key="BorderBrush" Color="#597B8D99"/>
     <SolidColorBrush x:Key="TrackBrush" Color="#52637682"/>
     <SolidColorBrush x:Key="AccentBrush" Color="#FF62E8C1"/>

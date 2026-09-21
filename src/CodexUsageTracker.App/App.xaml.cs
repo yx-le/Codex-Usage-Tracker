@@ -46,8 +46,8 @@ public partial class App : Application
     {
         var dark = IsDarkTheme(choice);
         var palette = dark
-            ? new[] { "#00111820", "#D9141E28", "#F21A2631", "#80283A47", "#D923313D", "#B53A4D5A", "#FFF7FAFC", "#FFB8C5CE", "#597B8D99", "#52637682", "#FF62E8C1", "#FF071A17", "#FFA8B7FF", "#FFFFB36B" }
-            : new[] { "#00F5F9FC", "#D9EEF5F8", "#F7FFFFFF", "#BFFFFFFF", "#EFFFFFFF", "#E5DCEAF0", "#FF102938", "#FF405766", "#526F8795", "#426D8795", "#FF007F68", "#FFFFFFFF", "#FF515EBD", "#FFC56016" };
+            ? new[] { "#00111820", "#99141E28", "#E61A2631", "#CC283A47", "#D923313D", "#B53A4D5A", "#FFF7FAFC", "#FFEAF1F6", "#597B8D99", "#52637682", "#FF62E8C1", "#FF071A17", "#FFA8B7FF", "#FFFFB36B" }
+            : new[] { "#00F5F9FC", "#99EEF5F8", "#F7FFFFFF", "#CCFFFFFF", "#EFFFFFFF", "#E5DCEAF0", "#FF102938", "#FF213C4B", "#526F8795", "#426D8795", "#FF007F68", "#FFFFFFFF", "#FF515EBD", "#FFC56016" };
         var keys = new[] { "BackgroundBrush", "GlassBrush", "GlassStrongBrush", "CardBrush", "InputBrush", "ButtonHoverBrush", "TextBrush", "MutedBrush", "BorderBrush", "TrackBrush", "AccentBrush", "AccentTextBrush", "WeekBrush", "DangerBrush" };
         for (var i = 0; i < keys.Length; i++) Current.Resources[keys[i]] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(palette[i]));
     }
