@@ -5,7 +5,9 @@
     <Grid Width="92" Height="92">
       <Ellipse Fill="{DynamicResource GlassStrongBrush}"/>
       <local:QuotaRing x:Name="Ring" Five="{Binding FiveValue}" Week="{Binding WeekValue}" FiveBrush="{Binding FiveBrush}" WeekBrush="{Binding WeekBrush}" FiveExhausted="{Binding FiveExhausted}" WeekExhausted="{Binding WeekExhausted}" Margin="3"/>
-      <TextBlock Text="{Binding FiveRemaining}" FontWeight="Medium" FontSize="23" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+      <TextBlock Text="{Binding FiveRemaining}" FontFamily="Segoe UI" FontWeight="Medium" FontSize="20" TextAlignment="Center" VerticalAlignment="Center" HorizontalAlignment="Center">
+        <TextBlock.RenderTransform><TranslateTransform Y="-1"/></TextBlock.RenderTransform>
+      </TextBlock>
     </Grid>
   </Button>
 </Window>
