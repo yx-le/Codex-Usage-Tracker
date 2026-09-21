@@ -11,7 +11,7 @@ Screenshots use clearly marked synthetic preview values, not account data.
 
 ## Features
 
-- Always-on-top circular widget; click or keyboard-activate to open details; drag to move.
+- Always-on-top circular widget with a clean circular edge and no clipped shadow; click or keyboard-activate to open details. Hold and drag anywhere on the circle to move it; the position is saved on release. Dragging never opens the details panel.
 - Borderless translucent panels with 40% desktop visibility, rounded glass cards, and light/dark palettes. A single 26-DIP clip keeps the background and content corners aligned; text and controls retain their own opacity.
 - System tray icon with quota rings, remaining quota tooltip, refresh, settings, and quit.
 - By default the circle is visible only while a Codex process runs; tray-only and always-visible modes are configurable.
@@ -102,7 +102,7 @@ docs/                       Architecture and synthetic UI previews
 
 ## Validation and limitations
 
-The initial implementation was compiled and tested on Windows 11 x64 with .NET SDK 8.0.425. Twenty automated tests cover bucket selection, unknown/malformed fields, stale readings, countdown boundaries, alert deduplication, local fallback, SQLite retention, and settings recovery. Live app-server retrieval was verified with an existing Codex sign-in. Both themes and the settings panel are rendered for visual checks. Windows 10 compatibility is targeted but has not been tested on a separate Windows 10 machine.
+The implementation was compiled and tested on Windows 11 x64 with .NET SDK 8.0.425. Twenty-seven automated tests cover bucket selection, unknown/malformed fields, stale readings, countdown boundaries, alert deduplication, local fallback, SQLite retention, settings recovery, and click/drag handling at different display scales. Live app-server retrieval was verified with an existing Codex sign-in. Both themes and the settings panel are rendered for visual checks; widget pixels outside the circular edge are verified transparent. Windows 10 compatibility is targeted but has not been tested on a separate Windows 10 machine.
 
 Codex process detection recognizes `codex.exe` (desktop app-server or CLI). The tracker's own temporary quota child is excluded from visibility decisions while it is reading. A background Codex process counts as running even if its main window is closed. There is no taskbar injection, browser scraping, automatic update service, or usage prediction based on token pricing. This is an independent utility, not an official OpenAI product.
 
