@@ -10,7 +10,8 @@ namespace CodexUsageTracker.App;
 public sealed class TrackerController : IDisposable
 {
     private readonly string settingsPath;
-    private readonly UsageRepository repository;
+    private readonly AsyncUsageRepository repository;
+    private int historyVersion;
     private readonly CancellationTokenSource lifetime = new();
     private readonly AppServerSource server = new();
     private readonly AlertPolicy alerts = new();
@@ -35,7 +36,7 @@ public sealed class TrackerController : IDisposable
         settingsPath = Path.Combine(dataDirectory, "settings.json");
         Settings = TrackerSettings.Load(settingsPath); App.ApplyTheme(Settings.Theme);
         ViewModel.Settings = Settings;
-        repository = new UsageRepository(Path.Combine(dataDirectory, "usage.db"));
+        repository = new AsyncUsageRepository(Path.Combine(dataDirectory, "usage.db"));
         widget = new WidgetWindow(this); details = new DetailsWindow(this);
         tray = new Forms.NotifyIcon { Text = "Codex Usage Tracker", Visible = true, Icon = Drawing.SystemIcons.Information };
         var menu = new RoundedTrayMenu
@@ -71,11 +72,10 @@ public sealed class TrackerController : IDisposable
         timer.Tick += OnTick;
         SystemEvents.UserPreferenceChanged += OnSystemPreferenceChanged;
         SystemEvents.DisplaySettingsChanged += OnDisplayChanged;
-        UpdateHistory();
         UpdateTray();
     }
 
-    public void Start() { timer.Start(); OnTick(null, EventArgs.Empty); }
+    public void Start() { timer.Start(); _ = UpdateHistoryAsync(); OnTick(null, EventArgs.Empty); }
     private async void OnTick(object? sender, EventArgs e)
     {
         if (disposed) return;
@@ -126,11 +126,11 @@ public sealed class TrackerController : IDisposable
             }, lifetime.Token);
             if (disposed) return;
             ViewModel.Snapshot = result.Item1; ViewModel.SourceDetail = result.detail;
-            try { repository.Save(result.Item1); repository.Prune(DateTimeOffset.UtcNow); ViewModel.StorageStatus = ""; UpdateHistory(); }
-            catch (Exception e) when (e is IOException or Microsoft.Data.Sqlite.SqliteException) { ViewModel.StorageStatus = "History could not be saved. Check available disk space and folder access."; }
+            ViewModel.Notify();
             foreach (var message in alerts.Evaluate(result.Item1, Settings, DateTimeOffset.UtcNow))
                 tray.ShowBalloonTip(7000, "Codex quota running low", message, Forms.ToolTipIcon.Warning);
             UpdateTray();
+            await UpdateHistoryAsync(result.Item1);
         }
         catch (OperationCanceledException) when (lifetime.IsCancellationRequested) { }
         finally { ViewModel.Busy = false; ViewModel.Notify(); }
@@ -183,13 +183,15 @@ public sealed class TrackerController : IDisposable
     public void ShowDetails()
     {
         details.ShowUsagePage();
-        PositionPanel(); UpdateHistory(); details.Show(); PositionPanel(); details.Activate();
+        PositionPanel(); details.Show(); PositionPanel(); details.Activate();
+        if (timer.IsEnabled) _ = UpdateHistoryAsync();
     }
     public void RepositionPanel() { if (details.IsVisible) PositionPanel(); }
     private void PositionPanel()
     {
         var dpi = VisualTreeHelper.GetDpi(widget);
-        var screen = Forms.Screen.FromPoint(new Drawing.Point((int)((widget.Left + 48) * dpi.DpiScaleX), (int)((widget.Top + 48) * dpi.DpiScaleY)));
+        var handle = new System.Windows.Interop.WindowInteropHelper(widget).Handle;
+        var screen = handle != IntPtr.Zero ? Forms.Screen.FromHandle(handle) : Forms.Screen.PrimaryScreen!;
         var area = screen.WorkingArea;
         var work = new LayoutRect(area.Left / dpi.DpiScaleX, area.Top / dpi.DpiScaleY, area.Width / dpi.DpiScaleX, area.Height / dpi.DpiScaleY);
         var anchor = new LayoutRect(widget.Left, widget.Top, widget.Width, widget.Height);
@@ -205,11 +207,25 @@ public sealed class TrackerController : IDisposable
         try { Settings.Save(settingsPath); App.ApplyTheme(Settings.Theme); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme)); widget.Ring.InvalidateVisual(); details.Chart.InvalidateVisual(); ViewModel.Notify(); UpdateTray(); }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException) { MessageBox.Show("Settings could not be saved. Check folder access.", "Codex Usage Tracker"); }
     }
-    public void ClearHistory() { repository.Clear(); UpdateHistory(); }
-    private void UpdateHistory()
+    public Task ClearHistoryAsync() => UpdateHistoryAsync(clear: true);
+    private async Task UpdateHistoryAsync(UsageSnapshot? snapshot = null, bool clear = false)
     {
-        try { details.SetHistory(repository.ReadHistory(DateTimeOffset.UtcNow)); }
-        catch (Microsoft.Data.Sqlite.SqliteException) { ViewModel.StorageStatus = "History is temporarily unavailable."; }
+        var version = ++historyVersion;
+        try
+        {
+            var history = await (clear ? repository.ClearAsync(lifetime.Token)
+                : snapshot is not null ? repository.SaveAndReadAsync(snapshot, lifetime.Token)
+                : repository.ReadAsync(lifetime.Token));
+            if (disposed || version != historyVersion) return;
+            details.SetHistory(history); ViewModel.StorageStatus = ""; ViewModel.Notify();
+        }
+        catch (OperationCanceledException) when (lifetime.IsCancellationRequested) { }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException)
+        {
+            if (!disposed && version == historyVersion)
+            { ViewModel.StorageStatus = "History is temporarily unavailable. Check folder access or try again shortly."; ViewModel.Notify(); }
+            if (clear) throw;
+        }
     }
     private void OnSystemPreferenceChanged(object sender, UserPreferenceChangedEventArgs e) => Application.Current.Dispatcher.BeginInvoke(() => { App.ApplyTheme(Settings.Theme); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme)); widget.Ring.InvalidateVisual(); details.Chart.InvalidateVisual(); });
     private void OnDisplayChanged(object? sender, EventArgs e) => Application.Current.Dispatcher.BeginInvoke(() => { widget.ClampPosition(); RepositionPanel(); });

@@ -35,9 +35,12 @@ public partial class SettingsPage : UserControl
         settings.Theme = ((ComboBoxItem)ThemeChoice.SelectedItem).Content.ToString()!; settings.CodexExecutable = executable;
         controller.SaveSettings(); controller.ShowUsagePage();
     }
-    private void ClearHistory(object sender, RoutedEventArgs e)
+    private async void ClearHistory(object sender, RoutedEventArgs e)
     {
-        try { controller.ClearHistory(); Validation.Text = "Local history cleared. New readings will start a fresh history."; }
-        catch (Microsoft.Data.Sqlite.SqliteException) { Validation.Text = "History is busy. Try again after the current refresh."; }
+        var button = (Button)sender; button.IsEnabled = false;
+        try { await controller.ClearHistoryAsync(); Validation.Text = "Local history cleared. New readings will start a fresh history."; }
+        catch (Exception error) when (error is Microsoft.Data.Sqlite.SqliteException or IOException or UnauthorizedAccessException)
+        { Validation.Text = "History could not be cleared. Check folder access or try again shortly."; }
+        finally { button.IsEnabled = true; }
     }
 }

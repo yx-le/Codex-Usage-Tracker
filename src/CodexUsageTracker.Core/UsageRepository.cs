@@ -8,7 +8,7 @@ public sealed class UsageRepository
     public UsageRepository(string path)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);
-        connectionString = new SqliteConnectionStringBuilder { DataSource = path }.ToString();
+        connectionString = new SqliteConnectionStringBuilder { DataSource = path, DefaultTimeout = 2 }.ToString();
         using var connection = Open();
         using var command = connection.CreateCommand();
         command.CommandText = """

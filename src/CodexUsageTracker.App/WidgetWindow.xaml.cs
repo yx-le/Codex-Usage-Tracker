@@ -1,4 +1,6 @@
 using System.Windows.Input;
+using System.Runtime.InteropServices;
+using System.Windows.Interop;
 
 namespace CodexUsageTracker.App;
 
@@ -11,15 +13,19 @@ public partial class WidgetWindow : Window
         InitializeComponent(); this.controller = controller; DataContext = controller.ViewModel;
         Left = controller.Settings.Left ?? SystemParameters.WorkArea.Right - Width - 24;
         Top = controller.Settings.Top ?? SystemParameters.WorkArea.Bottom - Height - 24;
-        ClampPosition();
+        SourceInitialized += (_, _) => ClampPosition();
         LostMouseCapture += (_, _) => { if (gesture.IsActive) FinishGesture(openOnClick: false); };
         IsVisibleChanged += (_, _) => { if (!IsVisible && gesture.IsActive) FinishGesture(openOnClick: false); };
     }
     public void ClampPosition()
     {
-        // Virtual desktop clamp preserves positions on secondary displays.
-        Left = Math.Clamp(double.IsFinite(Left) ? Left : 0, SystemParameters.VirtualScreenLeft, SystemParameters.VirtualScreenLeft + Math.Max(0, SystemParameters.VirtualScreenWidth - Width));
-        Top = Math.Clamp(double.IsFinite(Top) ? Top : 0, SystemParameters.VirtualScreenTop, SystemParameters.VirtualScreenTop + Math.Max(0, SystemParameters.VirtualScreenHeight - Height));
+        var handle = new WindowInteropHelper(this).Handle;
+        if (handle == IntPtr.Zero || !GetWindowRect(handle, out var rect)) return;
+        // Work in native pixels so monitor origins and mixed display scales agree.
+        var areas = System.Windows.Forms.Screen.AllScreens.Select(screen => screen.WorkingArea)
+            .Select(area => new LayoutRect(area.Left, area.Top, area.Width, area.Height)).ToArray();
+        var placement = WidgetPlacement.InsideNearestWorkArea(new(rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top), areas);
+        SetWindowPos(handle, IntPtr.Zero, (int)placement.Left, (int)placement.Top, 0, 0, 0x0001 | 0x0004 | 0x0010);
     }
     private void PointerDown(object sender, MouseButtonEventArgs e)
     {
@@ -54,10 +60,16 @@ public partial class WidgetWindow : Window
         if (moved)
         {
             ClampPosition();
+            controller.RepositionPanel();
             controller.Settings.Left = Left; controller.Settings.Top = Top; controller.SaveSettings();
         }
         else if (openOnClick) controller.ToggleDetails();
     }
     // Keyboard and accessibility activation still use the standard button action.
     private void OpenDetails(object sender, RoutedEventArgs e) => controller.ToggleDetails();
+    [StructLayout(LayoutKind.Sequential)] private struct NativeRect { public int Left, Top, Right, Bottom; }
+    [DllImport("user32.dll")] [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetWindowRect(IntPtr handle, out NativeRect rectangle);
+    [DllImport("user32.dll")] [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool SetWindowPos(IntPtr handle, IntPtr after, int x, int y, int width, int height, uint flags);
 }
