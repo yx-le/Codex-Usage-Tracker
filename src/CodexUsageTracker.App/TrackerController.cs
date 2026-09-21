@@ -58,7 +58,13 @@ public sealed class TrackerController : IDisposable
         menu.Items.Add(new Forms.ToolStripSeparator());
         menu.Items.Add("Quit", null, (_, _) => Application.Current.Shutdown());
         tray.ContextMenuStrip = menu;
-        foreach (Forms.ToolStripItem item in menu.Items) item.Padding = item is Forms.ToolStripSeparator ? new Forms.Padding(0, 4, 0, 4) : new Forms.Padding(10, 5, 10, 5);
+        foreach (Forms.ToolStripItem item in menu.Items)
+        {
+            item.Padding = item is Forms.ToolStripSeparator ? new Forms.Padding(0, 4, 0, 4) : new Forms.Padding(10, 5, 10, 5);
+            var preferred = item.GetPreferredSize(Drawing.Size.Empty);
+            item.AutoSize = false;
+            item.Size = new Drawing.Size(244 * menu.DeviceDpi / 96, preferred.Height);
+        }
         menu.Opening += (_, _) => UpdateTrayMenu();
         tray.MouseClick += (_, e) => { if (e.Button == Forms.MouseButtons.Left) ToggleDetails(); };
         timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
@@ -166,8 +172,8 @@ public sealed class TrackerController : IDisposable
     }
     private void UpdateTrayMenu()
     {
-        trayQuota.ShortcutKeyDisplayString = ViewModel.FiveRemaining;
-        trayWeek.ShortcutKeyDisplayString = ViewModel.WeekRemaining;
+        trayQuota.Tag = ViewModel.FiveRemaining;
+        trayWeek.Tag = ViewModel.WeekRemaining;
         trayFloating.Text = Settings.FloatingWidget ? "Hide floating circle" : "Show floating circle";
         if (tray.ContextMenuStrip is { } menu)
         { menu.BackColor = TrayMenuRenderer.Background; menu.ForeColor = TrayMenuRenderer.Foreground; }
