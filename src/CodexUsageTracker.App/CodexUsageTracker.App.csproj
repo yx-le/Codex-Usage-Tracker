@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <AssemblyName>CodexUsageTracker</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- WPF owns the message loop and reads DPI awareness from the manifest; WinForms is tray-only. -->
+    <NoWarn>$(NoWarn);WFAC010</NoWarn>
+  </PropertyGroup>
+  <ItemGroup><ProjectReference Include="../CodexUsageTracker.Core/CodexUsageTracker.Core.csproj" /></ItemGroup>
+</Project>

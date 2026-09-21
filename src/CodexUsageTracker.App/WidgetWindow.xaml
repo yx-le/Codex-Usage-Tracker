@@ -1,0 +1,13 @@
+<Window x:Class="CodexUsageTracker.App.WidgetWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="clr-namespace:CodexUsageTracker.App" Title="Codex quota indicator" Width="96" Height="96" WindowStyle="None" ResizeMode="NoResize" AllowsTransparency="True" Background="Transparent" ShowInTaskbar="False" Topmost="True" ShowActivated="False" PreviewMouseLeftButtonDown="PointerDown" PreviewMouseMove="PointerMove" PreviewMouseLeftButtonUp="PointerUp">
+  <Button ToolTip="{Binding WidgetTooltip}" Click="OpenDetails" AutomationProperties.Name="Open Codex quota details" Padding="0" Background="Transparent" BorderBrush="Transparent">
+    <Button.Template><ControlTemplate TargetType="Button"><ContentPresenter/></ControlTemplate></Button.Template>
+    <Grid Width="92" Height="92">
+      <Ellipse Fill="{DynamicResource BackgroundBrush}" Stroke="{DynamicResource BorderBrush}"/>
+      <local:QuotaRing x:Name="Ring" Five="{Binding FiveValue}" Week="{Binding WeekValue}" Margin="3"/>
+      <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+        <TextBlock Text="{Binding FiveRemaining}" FontWeight="SemiBold" FontSize="20" HorizontalAlignment="Center"/>
+        <TextBlock Text="{Binding Status}" FontSize="9" Foreground="{DynamicResource MutedBrush}" HorizontalAlignment="Center"/>
+      </StackPanel>
+    </Grid>
+  </Button>
+</Window>
