@@ -23,6 +23,8 @@ public sealed class TrackerController : IDisposable
     private readonly Forms.NotifyIcon tray;
     private readonly DispatcherTimer timer;
     private readonly WidgetWindow widget;
+    private readonly EdgeBarWindow edgeBar;
+    private bool edgeAnchor;
     private readonly DetailsWindow details;
     private DateTimeOffset lastAttempt = DateTimeOffset.MinValue;
     private bool disposed, lastRunning;
@@ -37,7 +39,7 @@ public sealed class TrackerController : IDisposable
         Settings = TrackerSettings.Load(settingsPath); App.ApplyTheme(Settings.Theme);
         ViewModel.Settings = Settings;
         repository = new AsyncUsageRepository(Path.Combine(dataDirectory, "usage.db"));
-        widget = new WidgetWindow(this); details = new DetailsWindow(this);
+        widget = new WidgetWindow(this); details = new DetailsWindow(this); edgeBar = new EdgeBarWindow(this);
         tray = new Forms.NotifyIcon { Text = "Codex Usage Tracker", Visible = true, Icon = Drawing.SystemIcons.Information };
         var menu = new RoundedTrayMenu
         {
@@ -85,6 +87,9 @@ public sealed class TrackerController : IDisposable
         if (Settings.FloatingWidget && (!Settings.OnlyWhileCodexRunning || running))
         { if (!widget.IsVisible) widget.Show(); }
         else widget.Hide();
+        if (Settings.EdgeBar && (!Settings.OnlyWhileCodexRunning || running))
+        { if (!edgeBar.IsVisible) { edgeBar.Place(); edgeBar.Show(); edgeBar.Place(); } }
+        else edgeBar.Hide();
         if (Settings.OnlyWhileCodexRunning && !running && lastRunning) details.Hide();
         var justStarted = running && !lastRunning; lastRunning = running;
         ViewModel.Notify();
@@ -138,7 +143,7 @@ public sealed class TrackerController : IDisposable
 
     private void UpdateTray()
     {
-        var state = $"{ViewModel.FiveValue}|{ViewModel.WeekValue}|{ViewModel.OverallStatus}|{ViewModel.Status}|{Settings.Theme}|{App.IsDarkTheme(Settings.Theme)}";
+        var state = $"{ViewModel.FiveValue}|{ViewModel.WeekValue}|{ViewModel.OverallStatus}|{ViewModel.Status}|{Settings.Theme}|{App.IsDarkTheme(Settings.Theme)}|{Settings.TrayPercentage}|{Settings.TrayQuota}|{ViewModel.FiveStatus}|{ViewModel.WeekStatus}";
         if (state == lastTrayState) return;
         lastTrayState = state;
         tray.Text = $"Codex · 5h {ViewModel.FiveRemaining} · week {ViewModel.WeekRemaining} · {ViewModel.Status}";
@@ -164,6 +169,19 @@ public sealed class TrackerController : IDisposable
         using var textBrush = new Drawing.SolidBrush(Drawing.Color.White);
         using var format = new Drawing.StringFormat { Alignment = Drawing.StringAlignment.Center, LineAlignment = Drawing.StringAlignment.Center };
         graphics.DrawString(label, font, textBrush, new Drawing.RectangleF(2, 2, 28, 28), format);
+        if (Settings.TrayPercentage)
+        {
+            graphics.Clear(Drawing.Color.Transparent);
+            using var tile = new Drawing.SolidBrush(Drawing.Color.FromArgb(22, 32, 42));
+            graphics.FillRectangle(tile, 0, 0, 32, 32);
+            var weekly = Settings.TrayQuota == "Weekly";
+            var status = weekly ? ViewModel.WeekStatus : ViewModel.FiveStatus;
+            var value = status is QuotaStatus.Unknown or QuotaStatus.ResetDue or QuotaStatus.Stale ? "–" : (weekly ? ViewModel.WeekRemaining : ViewModel.FiveRemaining).Replace("%", "");
+            var tint = ((SolidColorBrush)(weekly ? ViewModel.WeekBrush : ViewModel.FiveBrush)).Color;
+            using var ink = new Drawing.SolidBrush(status is QuotaStatus.Critical or QuotaStatus.Exhausted ? Drawing.Color.FromArgb(255, 113, 140) : status == QuotaStatus.Warning ? Drawing.Color.FromArgb(255, 192, 92) : Drawing.Color.White);
+            using var digits = new Drawing.Font("Segoe UI", value.Length >= 3 ? 19 : 24, Drawing.FontStyle.Bold, Drawing.GraphicsUnit.Pixel);
+            graphics.DrawString(value, digits, ink, new Drawing.RectangleF(-1, 0, 34, 32), format);
+        }
         var handle = bitmap.GetHicon();
         Drawing.Icon next;
         using (var borrowed = Drawing.Icon.FromHandle(handle)) next = (Drawing.Icon)borrowed.Clone();
@@ -179,7 +197,8 @@ public sealed class TrackerController : IDisposable
         { menu.BackColor = TrayMenuRenderer.Background; menu.ForeColor = TrayMenuRenderer.Foreground; }
     }
     [DllImport("user32.dll")] [return: MarshalAs(UnmanagedType.Bool)] private static extern bool DestroyIcon(IntPtr handle);
-    public void ToggleDetails() { if (details.IsVisible) details.Hide(); else ShowDetails(); }
+    public void ToggleDetails(bool fromEdge = false) { edgeAnchor = fromEdge; if (details.IsVisible) details.Hide(); else ShowDetails(); }
+    public void ToggleEdgeDetails() => ToggleDetails(fromEdge: true);
     public void ShowDetails()
     {
         details.ShowUsagePage();
@@ -189,13 +208,14 @@ public sealed class TrackerController : IDisposable
     public void RepositionPanel() { if (details.IsVisible) PositionPanel(); }
     private void PositionPanel()
     {
-        var dpi = VisualTreeHelper.GetDpi(widget);
-        var handle = new System.Windows.Interop.WindowInteropHelper(widget).Handle;
+        Window anchorWindow = edgeBar.IsVisible && (edgeAnchor || !widget.IsVisible) ? edgeBar : widget;
+        var dpi = VisualTreeHelper.GetDpi(anchorWindow);
+        var handle = new System.Windows.Interop.WindowInteropHelper(anchorWindow).Handle;
         var screen = handle != IntPtr.Zero ? Forms.Screen.FromHandle(handle) : Forms.Screen.PrimaryScreen!;
         var area = screen.WorkingArea;
         var work = new LayoutRect(area.Left / dpi.DpiScaleX, area.Top / dpi.DpiScaleY, area.Width / dpi.DpiScaleX, area.Height / dpi.DpiScaleY);
-        var anchor = new LayoutRect(widget.Left, widget.Top, widget.Width, widget.Height);
-        if (!widget.IsVisible) anchor = new LayoutRect(work.Right - 96, work.Bottom - 96, 96, 96);
+        var anchor = new LayoutRect(anchorWindow.Left, anchorWindow.Top, anchorWindow.Width, anchorWindow.Height);
+        if (!anchorWindow.IsVisible) anchor = new LayoutRect(work.Right - 96, work.Bottom - 96, 96, 96);
         var placement = PanelPlacement.Beside(work, anchor, 420, 790);
         details.Width = placement.Width; details.Height = placement.Height;
         details.Left = placement.Left; details.Top = placement.Top;
@@ -204,7 +224,7 @@ public sealed class TrackerController : IDisposable
     public void ShowUsagePage() => details.ShowUsagePage();
     public void SaveSettings()
     {
-        try { Settings.Save(settingsPath); App.ApplyTheme(Settings.Theme); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme)); widget.Ring.InvalidateVisual(); details.Chart.InvalidateVisual(); ViewModel.Notify(); UpdateTray(); }
+        try { Settings.Save(settingsPath); App.ApplyTheme(Settings.Theme); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme)); widget.Ring.InvalidateVisual(); details.Chart.InvalidateVisual(); edgeBar.Place(); ViewModel.Notify(); UpdateTray(); }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException) { MessageBox.Show("Settings could not be saved. Check folder access.", "Codex Usage Tracker"); }
     }
     public bool TrySaveSettings(TrackerSettings candidate, out string error)
@@ -214,7 +234,7 @@ public sealed class TrackerController : IDisposable
         { error = "Settings could not be saved. Your edits are still here; check folder access and try again."; return false; }
         Settings = candidate; ViewModel.Settings = candidate;
         App.ApplyTheme(Settings.Theme); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme));
-        widget.Ring.InvalidateVisual(); details.Chart.InvalidateVisual(); ViewModel.Notify(); UpdateTray();
+        widget.Ring.InvalidateVisual(); details.Chart.InvalidateVisual(); edgeBar.Place(); ViewModel.Notify(); UpdateTray();
         error = ""; return true;
     }
     public Task ClearHistoryAsync() => UpdateHistoryAsync(clear: true);
@@ -238,7 +258,7 @@ public sealed class TrackerController : IDisposable
         }
     }
     private void OnSystemPreferenceChanged(object sender, UserPreferenceChangedEventArgs e) => Application.Current.Dispatcher.BeginInvoke(() => { App.ApplyTheme(Settings.Theme); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme)); widget.Ring.InvalidateVisual(); details.Chart.InvalidateVisual(); });
-    private void OnDisplayChanged(object? sender, EventArgs e) => Application.Current.Dispatcher.BeginInvoke(() => { widget.ClampPosition(); RepositionPanel(); });
+    private void OnDisplayChanged(object? sender, EventArgs e) => Application.Current.Dispatcher.BeginInvoke(() => { widget.ClampPosition(); edgeBar.Place(); RepositionPanel(); });
 
     public void RenderPreview(string directory, string theme = "Dark")
     {
@@ -261,6 +281,8 @@ public sealed class TrackerController : IDisposable
                 using var file = File.Create(Path.Combine(directory, name + ".png")); encoder.Save(file);
             }
             Capture("widget", widget); Capture("details", details);
+            foreach (var edge in new[] { "Top", "Left", "Right" }) { Settings.Edge = edge; edgeBar.Place(); edgeBar.Show(); edgeBar.Place(); Capture("edge-" + edge, edgeBar); }
+            edgeBar.Hide(); Settings.Edge = "Top";
             var windowCount = Application.Current.Windows.Count;
             details.ShowSettingsPage(); Capture("settings", details);
             var original = Settings;

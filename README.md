@@ -23,6 +23,12 @@ Screenshots use clearly marked synthetic preview values, not account data.
 - Explicit LIVE, LOCAL, STALE, RESET DUE, and N/A states, plus last-reading timestamp and source details.
 - No API key, browser cookies, tracker telemetry, or prompt/response storage.
 
+## Display options
+
+Settings lets you combine the floating circle, a numeric taskbar notification-area icon, and a slim edge bar. The tray number shows **remaining percent** (5-hour or weekly); it omits the percent sign to stay legible at icon size and shows a dash for stale/unavailable readings. Windows controls whether the icon appears directly on the taskbar or in overflow; drag it out of overflow to keep it visible.
+
+The optional edge bar shows both quotas. Choose Top, Left, or Right, then drag along that edge to reposition it or move it to another monitor. Click for details. Its position is remembered, and it follows the same Codex-running visibility setting as the circle. Disable the floating circle for tray-only or edge-bar use. The bar overlays a small part of the desktop; it does not reserve desktop space or modify Explorer.
+
 ## Run
 
 Extract the Windows portable package and open **CodexUsageTracker.exe**. The self-contained package includes the .NET runtime and does not require administrator access. Keep its companion files together.
@@ -102,7 +108,7 @@ docs/                       Architecture and synthetic UI previews
 
 ## Validation and limitations
 
-The implementation was compiled and tested on Windows 11 x64 with .NET SDK 8.0.425. Sixty-two automated tests cover bucket selection, unknown/malformed fields, stale readings, countdown boundaries, alert deduplication, local fallback, SQLite retention, settings recovery, click/drag handling at different display scales, quota status thresholds, non-overlapping panel placement, reset refresh retries through unavailable readings, monitor-gap recovery, and queued history operations under a SQLite write lock. Live app-server retrieval was verified with an existing Codex sign-in. Both themes and the settings panel are rendered for visual checks; widget pixels outside the circular edge are verified transparent. Windows 10 compatibility is targeted but has not been tested on a separate Windows 10 machine.
+The implementation was compiled and tested on Windows 11 x64 with .NET SDK 8.0.425. Seventy automated tests cover bucket selection, unknown/malformed fields, stale readings, countdown boundaries, alert deduplication, local fallback, SQLite retention, settings recovery, click/drag handling at different display scales, quota status thresholds, non-overlapping panel placement, reset refresh retries through unavailable readings, monitor-gap recovery, and queued history operations under a SQLite write lock. Live app-server retrieval was verified with an existing Codex sign-in. Both themes and the settings panel are rendered for visual checks; widget pixels outside the circular edge are verified transparent. Windows 10 compatibility is targeted but has not been tested on a separate Windows 10 machine.
 
 Codex process detection recognizes `codex.exe` (desktop app-server or CLI). The tracker's own temporary quota child is excluded from visibility decisions while it is reading. A background Codex process counts as running even if its main window is closed. There is no taskbar injection, browser scraping, automatic update service, or usage prediction based on token pricing. This is an independent utility, not an official OpenAI product.
 
