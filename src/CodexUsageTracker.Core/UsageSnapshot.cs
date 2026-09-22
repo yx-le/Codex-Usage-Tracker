@@ -9,6 +9,7 @@ public sealed record QuotaWindow(double UsedPercent, int DurationMinutes, DateTi
         if (ResetsAt is not { } reset) return "Reset time unavailable";
         var delta = reset - now;
         if (delta <= TimeSpan.Zero) return "Reset due · awaiting update";
+        if (delta.TotalMinutes < 1) return "Resets in less than 1 minute";
         return delta.TotalDays >= 1 ? $"Resets in {(int)delta.TotalDays}d {delta.Hours}h"
             : $"Resets in {(int)delta.TotalHours}h {delta.Minutes}m";
     }

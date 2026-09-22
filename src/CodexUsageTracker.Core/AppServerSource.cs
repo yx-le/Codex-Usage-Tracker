@@ -45,10 +45,7 @@ public sealed class AppServerSource
         while (await process.StandardOutput.ReadLineAsync(token) is { } line)
         {
             using var document = JsonDocument.Parse(line);
-            var root = document.RootElement;
-            if (!root.TryGetProperty("id", out var responseId) || !responseId.TryGetInt32(out var value) || value != id) continue;
-            if (root.TryGetProperty("error", out _)) throw new IOException("Codex did not return quota data. Check your Codex sign-in.");
-            return root.GetProperty("result").Clone();
+            if (RpcResponseParser.TryReadResult(document.RootElement, id, out var result)) return result;
         }
         throw new IOException("Codex closed the quota connection.");
     }

@@ -18,6 +18,8 @@ public sealed class TrackerViewModel : INotifyPropertyChanged
     public Brush OverallBrush => StatusBrush(OverallStatus, "AccentBrush");
     public bool FiveExhausted => FiveStatus == QuotaStatus.Exhausted;
     public bool WeekExhausted => WeekStatus == QuotaStatus.Exhausted;
+    public bool FiveStale => FiveStatus == QuotaStatus.Stale;
+    public bool WeekStale => WeekStatus == QuotaStatus.Stale;
     public Brush FiveTrackBrush => FiveExhausted ? FiveBrush : (Brush)Application.Current.FindResource("TrackBrush");
     public Brush WeekTrackBrush => WeekExhausted ? WeekBrush : (Brush)Application.Current.FindResource("TrackBrush");
     public string WidgetStatus => OverallStatus switch

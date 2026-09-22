@@ -9,6 +9,12 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        if (e.Args.Contains("--enable-startup"))
+        {
+            try { StartupRegistration.SetEnabled(true); Shutdown(0); }
+            catch (Exception error) when (error is IOException or UnauthorizedAccessException or System.Security.SecurityException) { Shutdown(1); }
+            return;
+        }
         if (e.Args.Length >= 2 && e.Args[0] == "--render-preview")
         {
             Directory.CreateDirectory(e.Args[1]);

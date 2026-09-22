@@ -27,7 +27,7 @@ public sealed class TrackerController : IDisposable
     private DateTimeOffset lastAttempt = DateTimeOffset.MinValue;
     private bool disposed, lastRunning;
     private Drawing.Icon? ownedIcon;
-    public TrackerSettings Settings { get; }
+    public TrackerSettings Settings { get; private set; }
     public TrackerViewModel ViewModel { get; } = new();
 
     public TrackerController(string? dataDirectory = null)
@@ -207,6 +207,16 @@ public sealed class TrackerController : IDisposable
         try { Settings.Save(settingsPath); App.ApplyTheme(Settings.Theme); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme)); widget.Ring.InvalidateVisual(); details.Chart.InvalidateVisual(); ViewModel.Notify(); UpdateTray(); }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException) { MessageBox.Show("Settings could not be saved. Check folder access.", "Codex Usage Tracker"); }
     }
+    public bool TrySaveSettings(TrackerSettings candidate, out string error)
+    {
+        try { candidate.Save(settingsPath); }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        { error = "Settings could not be saved. Your edits are still here; check folder access and try again."; return false; }
+        Settings = candidate; ViewModel.Settings = candidate;
+        App.ApplyTheme(Settings.Theme); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme));
+        widget.Ring.InvalidateVisual(); details.Chart.InvalidateVisual(); ViewModel.Notify(); UpdateTray();
+        error = ""; return true;
+    }
     public Task ClearHistoryAsync() => UpdateHistoryAsync(clear: true);
     private async Task UpdateHistoryAsync(UsageSnapshot? snapshot = null, bool clear = false)
     {
@@ -253,6 +263,16 @@ public sealed class TrackerController : IDisposable
             Capture("widget", widget); Capture("details", details);
             var windowCount = Application.Current.Windows.Count;
             details.ShowSettingsPage(); Capture("settings", details);
+            var original = Settings;
+            var candidate = original.Copy(); candidate.WarningPercent = 44;
+            var blockedSave = settingsPath + ".tmp";
+            Directory.CreateDirectory(blockedSave);
+            try
+            {
+                if (TrySaveSettings(candidate, out _) || !ReferenceEquals(Settings, original) || !details.IsSettingsPage)
+                    throw new InvalidOperationException("A failed save must preserve settings and navigation.");
+            }
+            finally { Directory.Delete(blockedSave); }
             if (!details.IsSettingsPage || Application.Current.Windows.Count != windowCount)
                 throw new InvalidOperationException("Settings must replace usage inside the same window.");
             details.ShowUsagePage();
@@ -263,6 +283,10 @@ public sealed class TrackerController : IDisposable
                 ViewModel.Notify(); Capture("widget-" + name, widget); Capture("details-" + name, details);
             }
             UpdateTray(); UpdateTrayMenu();
+            var fresh = ViewModel.Snapshot;
+            ViewModel.Snapshot = fresh with { ObservedAt = now.AddMinutes(-5), FiveHour = new(27, 300, now.AddHours(2)) };
+            ViewModel.Notify(); Capture("widget-stale", widget);
+            ViewModel.Snapshot = fresh; ViewModel.Notify();
             if (tray.ContextMenuStrip is { } menu)
             {
                 menu.CreateControl(); menu.Size = menu.GetPreferredSize(Drawing.Size.Empty);

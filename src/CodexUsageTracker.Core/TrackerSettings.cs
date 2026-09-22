@@ -13,6 +13,7 @@ public sealed class TrackerSettings
     public string CodexExecutable { get; set; } = "";
     public double? Left { get; set; }
     public double? Top { get; set; }
+    public TrackerSettings Copy() => (TrackerSettings)MemberwiseClone();
 
     public static TrackerSettings Load(string path)
     {
