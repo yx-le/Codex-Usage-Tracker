@@ -15,8 +15,8 @@ public partial class SettingsPage : UserControl
         Alerts.IsChecked = settings.AlertsEnabled; Warning.Text = settings.WarningPercent.ToString(); Critical.Text = settings.CriticalPercent.ToString();
         ThemeChoice.SelectedIndex = settings.Theme == "Light" ? 1 : settings.Theme == "Dark" ? 2 : 0;
         Executable.Text = settings.CodexExecutable;
-        TrayNumber.IsChecked = settings.TrayPercentage; TrayWindow.SelectedIndex = settings.TrayQuota == "Weekly" ? 1 : 0;
-        EdgeEnabled.IsChecked = settings.EdgeBar; EdgeChoice.SelectedIndex = settings.Edge == "Left" ? 1 : settings.Edge == "Right" ? 2 : 0;
+        TaskbarEnabled.IsChecked = settings.TaskbarStatus;
+        EdgeEnabled.IsChecked = settings.EdgeBar;
     }
     private void Cancel(object sender, RoutedEventArgs e) => controller.ShowUsagePage();
     private void DragWindow(object sender, MouseButtonEventArgs e) { if (e.LeftButton == MouseButtonState.Pressed) Window.GetWindow(this)?.DragMove(); }
@@ -33,8 +33,8 @@ public partial class SettingsPage : UserControl
         if (executable.Length > 0 && (!File.Exists(executable) || !string.Equals(Path.GetFileName(executable), "codex.exe", StringComparison.OrdinalIgnoreCase)))
         { Validation.Text = "Choose an existing codex.exe, or leave the path blank."; return; }
         var settings = controller.Settings.Copy();
-        settings.TrayPercentage = TrayNumber.IsChecked == true; settings.TrayQuota = ((ComboBoxItem)TrayWindow.SelectedItem).Content.ToString()!;
-        settings.EdgeBar = EdgeEnabled.IsChecked == true; settings.Edge = ((ComboBoxItem)EdgeChoice.SelectedItem).Content.ToString()!;
+        settings.TaskbarStatus = TaskbarEnabled.IsChecked == true; settings.TrayPercentage = false;
+        settings.EdgeBar = EdgeEnabled.IsChecked == true;
         settings.OnlyWhileCodexRunning = OnlyRunning.IsChecked == true; settings.FloatingWidget = Floating.IsChecked == true;
         settings.AlertsEnabled = Alerts.IsChecked == true; settings.WarningPercent = warning; settings.CriticalPercent = critical;
         settings.Theme = ((ComboBoxItem)ThemeChoice.SelectedItem).Content.ToString()!; settings.CodexExecutable = executable;

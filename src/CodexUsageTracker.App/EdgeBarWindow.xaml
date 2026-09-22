@@ -1,15 +1,13 @@
 <Window x:Class="CodexUsageTracker.App.EdgeBarWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" WindowStyle="None" ResizeMode="NoResize" AllowsTransparency="True" Background="Transparent" ShowInTaskbar="False" Topmost="True" ShowActivated="False" Title="Codex edge usage bar">
-  <Border Background="{DynamicResource GlassStrongBrush}" CornerRadius="8" Padding="8,5" MouseLeftButtonDown="MoveOrOpen" Cursor="Hand" AutomationProperties.Name="Codex usage; click for details, drag along screen edge">
+  <Border Background="{DynamicResource EdgeGlassBrush}" CornerRadius="5" Padding="6,4" MouseLeftButtonDown="MoveOrOpen" Cursor="Hand" AutomationProperties.Name="Codex usage; click for details, drag along screen edge">
     <StackPanel x:Name="Quotas" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
       <StackPanel x:Name="FiveBlock" Width="60" Margin="0,0,10,0">
-        <TextBlock Text="5h" FontSize="9" Foreground="{DynamicResource MutedBrush}" HorizontalAlignment="Center"/>
-        <TextBlock Text="{Binding FiveRemaining}" FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-        <ProgressBar Height="3" Margin="0,3,0,0" Maximum="100" Value="{Binding FiveValue, Mode=OneWay}" Foreground="{Binding FiveBrush}" Background="{Binding FiveTrackBrush}" BorderThickness="0"/>
+        <TextBlock FontSize="11" HorizontalAlignment="Center"><Run Text="5h " FontSize="9"/><Run Text="{Binding FiveRemaining, Mode=OneWay}"/></TextBlock>
+        <ProgressBar Height="2" Margin="0,2,0,0" Maximum="100" Value="{Binding FiveValue, Mode=OneWay}" Foreground="{Binding EdgeFiveBrush}" Background="{Binding FiveTrackBrush}" BorderThickness="0"/>
       </StackPanel>
       <StackPanel x:Name="WeekBlock" Width="60">
-        <TextBlock Text="Week" FontSize="9" Foreground="{DynamicResource MutedBrush}" HorizontalAlignment="Center"/>
-        <TextBlock Text="{Binding WeekRemaining}" FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-        <ProgressBar Height="3" Margin="0,3,0,0" Maximum="100" Value="{Binding WeekValue, Mode=OneWay}" Foreground="{Binding WeekBrush}" Background="{Binding WeekTrackBrush}" BorderThickness="0"/>
+        <TextBlock FontSize="11" HorizontalAlignment="Center"><Run Text="W " FontSize="9"/><Run Text="{Binding WeekRemaining, Mode=OneWay}"/></TextBlock>
+        <ProgressBar Height="2" Margin="0,2,0,0" Maximum="100" Value="{Binding WeekValue, Mode=OneWay}" Foreground="{Binding EdgeWeekBrush}" Background="{Binding WeekTrackBrush}" BorderThickness="0"/>
       </StackPanel>
     </StackPanel>
   </Border>

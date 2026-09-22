@@ -6,7 +6,8 @@ public sealed class TrackerSettings
 {
     public bool OnlyWhileCodexRunning { get; set; } = true;
     public bool FloatingWidget { get; set; } = true;
-    public bool TrayPercentage { get; set; } = true;
+    public bool TaskbarStatus { get; set; } = true;
+    public bool TrayPercentage { get; set; } // Legacy preference, no longer used.
     public string TrayQuota { get; set; } = "5-hour";
     public bool EdgeBar { get; set; }
     public string Edge { get; set; } = "Top";

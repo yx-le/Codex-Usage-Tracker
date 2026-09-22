@@ -6,6 +6,13 @@ namespace CodexUsageTracker.Tests;
 public class EdgeBarTests
 {
     [Theory]
+    [InlineData(500, 10, "Top")]
+    [InlineData(8, 400, "Left")]
+    [InlineData(990, 400, "Right")]
+    [InlineData(500, 790, "Left")]
+    public void DragChoosesNearestSupportedEdge(double x, double y, string expected)
+        => Assert.Equal(expected, EdgeBarPlacement.NearestEdge(new(0, 0, 1000, 800), x, y));
+    [Theory]
     [InlineData("Top", 0)] [InlineData("Top", 1)]
     [InlineData("Left", 0)] [InlineData("Left", 1)]
     [InlineData("Right", 0)] [InlineData("Right", 1)]

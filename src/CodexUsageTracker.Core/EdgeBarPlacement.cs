@@ -2,6 +2,12 @@ namespace CodexUsageTracker.Core;
 
 public static class EdgeBarPlacement
 {
+    public static string NearestEdge(LayoutRect work, double x, double y)
+    {
+        var top = Math.Abs(y - work.Top);
+        var left = Math.Abs(x - work.Left); var right = Math.Abs(x - work.Right);
+        return top <= Math.Min(left, right) ? "Top" : left <= right ? "Left" : "Right";
+    }
     public static LayoutRect Place(LayoutRect work, string edge, double offset, double width, double height)
     {
         offset = double.IsFinite(offset) ? Math.Clamp(offset, 0, 1) : 0.5;

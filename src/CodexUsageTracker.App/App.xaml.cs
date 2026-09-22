@@ -6,6 +6,7 @@ public partial class App : Application
 {
     private Mutex? instance;
     private TrackerController? controller;
+    private CodexStartupWatcher? watcher;
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
@@ -24,14 +25,16 @@ public partial class App : Application
                 error.Handled = true; Shutdown(1);
             };
         }
-        instance = new Mutex(true, @"Local\CodexUsageTracker", out var created);
+        var watchMode = e.Args.Contains("--watch-codex");
+        instance = new Mutex(true, watchMode ? @"Local\CodexUsageTracker.Watcher" : @"Local\CodexUsageTracker", out var created);
         if (!created) { Shutdown(); return; }
+        if (watchMode) { watcher = new CodexStartupWatcher(); return; }
         try
         {
             var preview = e.Args.Length >= 2 && e.Args[0] == "--render-preview";
             controller = new TrackerController(preview ? Path.Combine(Path.GetFullPath(e.Args[1]), "preview-data") : null);
             if (preview) controller.RenderPreview(Path.GetFullPath(e.Args[1]), e.Args.Length >= 3 ? e.Args[2] : "Dark");
-            else controller.Start();
+            else { controller.Start(); if (StartupRegistration.IsEnabled) StartupRegistration.EnsureWatcher(); }
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException)
         {
@@ -58,10 +61,11 @@ public partial class App : Application
         for (var i = 0; i < keys.Length; i++) Current.Resources[keys[i]] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(palette[i]));
         Current.Resources["WarningBrush"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(dark ? "#FFC05C" : "#974B00"));
         Current.Resources["CriticalBrush"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(dark ? "#FF718C" : "#AE1638"));
+        Current.Resources["EdgeGlassBrush"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(dark ? "#40141E28" : "#40FFFFFF"));
     }
 
     protected override void OnExit(ExitEventArgs e)
     {
-        controller?.Dispose(); instance?.Dispose(); base.OnExit(e);
+        watcher?.Dispose(); controller?.Dispose(); instance?.Dispose(); base.OnExit(e);
     }
 }

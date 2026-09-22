@@ -4,10 +4,10 @@ A small, native Windows companion for keeping an eye on your remaining Codex quo
 
 The floating circle stays above other windows while Codex is running. Click it for the detailed panel; drag it to move. The outer teal ring shows five-hour quota remaining, the inner purple ring shows weekly quota remaining, and the center shows the five-hour percentage. The circle shows only the percentage and rings, without a status caption. Dashed rings indicate stale readings. The rounded, neutral tray menu remains available when the circle is hidden.
 
-<img src="docs/images/widget.png" width="96" alt="Circular quota widget using synthetic preview data" />
-<img src="docs/images/details.png" width="420" alt="Detailed quota panel using synthetic preview data" />
+<img src="docs/images/widget.png" width="960" alt="Circular quota widget in an illustrative desktop workspace" />
+<img src="docs/images/details.png" width="960" alt="Detailed quota panel over an illustrative desktop workspace" />
 
-Screenshots use clearly marked synthetic preview values, not account data.
+Images combine the actual WPF app rendering with an illustrative desktop and synthetic quota values; no private desktop content or account data is captured.
 
 ## Features
 
@@ -25,9 +25,9 @@ Screenshots use clearly marked synthetic preview values, not account data.
 
 ## Display options
 
-Settings lets you combine the floating circle, a numeric taskbar notification-area icon, and a slim edge bar. The tray number shows **remaining percent** (5-hour or weekly); it omits the percent sign to stay legible at icon size and shows a dash for stale/unavailable readings. Windows controls whether the icon appears directly on the taskbar or in overflow; drag it out of overflow to keep it visible.
+The tray uses its original circular status icon. **Show status in the Windows taskbar** adds a separate native taskbar button with remaining-quota progress; its title and hover description contain both quotas. Click it to open details. Right-click the taskbar button and choose **Pin to taskbar** to retain its launcher when the tracker closes. Windows controls icon grouping and whether title text is visible; this does not insert custom text into Explorer or change your taskbar settings.
 
-The optional edge bar shows both quotas. Choose Top, Left, or Right, then drag along that edge to reposition it or move it to another monitor. Click for details. Its position is remembered, and it follows the same Codex-running visibility setting as the circle. Disable the floating circle for tray-only or edge-bar use. The bar overlays a small part of the desktop; it does not reserve desktop space or modify Explorer.
+The optional edge bar is 132 × 28 DIPs along the top or 52 × 62 DIPs at a side. Drag near the top, left, or right edge and release: it snaps and adapts automatically, remembering the monitor and position. Its background is **75% transparent**, with quiet neutral quota bars and colored low-quota warnings. Click for details. Disable the floating circle for taskbar-only or edge-bar use. The bar overlays a small part of the desktop; it does not reserve space.
 
 ## Run
 
@@ -37,7 +37,7 @@ Sign in to Codex normally. The tracker uses Codex's existing sign-in through its
 
 Click the tray icon or the floating circle to open the panel. Escape returns from Settings to usage; otherwise Escape or the panel's close button collapses it. Use **Quit** in the tray menu to exit the app. The circle uses a fixed 96-DIP footprint and follows Windows DPI scaling. Windows may initially place the tray icon in its overflow area.
 
-Enable **Launch tracker at Windows sign-in** in Settings to start quietly in the tray. With **Show widget only while Codex is running** enabled, the circle appears when Codex opens. The startup option saves immediately and uses a per-user Windows startup entry; disable it in Settings to remove that entry. Keep the portable folder in place, or toggle startup off/on after moving it. Choosing Quit stops monitoring until you reopen the tracker or sign in again.
+Enable **Automatically launch with Codex** in Settings. A quiet per-user watcher starts at Windows sign-in and checks for Codex every two seconds. It launches the tracker when Codex opens, including when Codex is already open at watcher startup. Choosing Quit suppresses relaunch for that Codex session; opening Codex again launches the tracker again. Disable the option to remove the startup entry and stop the watcher. Keep the portable folder in place, or toggle the option off/on after moving it.
 
 ## Build and test
 
@@ -108,7 +108,7 @@ docs/                       Architecture and synthetic UI previews
 
 ## Validation and limitations
 
-The implementation was compiled and tested on Windows 11 x64 with .NET SDK 8.0.425. Seventy automated tests cover bucket selection, unknown/malformed fields, stale readings, countdown boundaries, alert deduplication, local fallback, SQLite retention, settings recovery, click/drag handling at different display scales, quota status thresholds, non-overlapping panel placement, reset refresh retries through unavailable readings, monitor-gap recovery, and queued history operations under a SQLite write lock. Live app-server retrieval was verified with an existing Codex sign-in. Both themes and the settings panel are rendered for visual checks; widget pixels outside the circular edge are verified transparent. Windows 10 compatibility is targeted but has not been tested on a separate Windows 10 machine.
+The implementation was compiled and tested on Windows 11 x64 with .NET SDK 8.0.425. Seventy-four automated tests cover bucket selection, unknown/malformed fields, stale readings, countdown boundaries, alert deduplication, local fallback, SQLite retention, settings recovery, click/drag handling at different display scales, quota status thresholds, non-overlapping panel placement, reset refresh retries through unavailable readings, monitor-gap recovery, and queued history operations under a SQLite write lock. Live app-server retrieval was verified with an existing Codex sign-in. Both themes and the settings panel are rendered for visual checks; widget pixels outside the circular edge are verified transparent. Windows 10 compatibility is targeted but has not been tested on a separate Windows 10 machine.
 
 Codex process detection recognizes `codex.exe` (desktop app-server or CLI). The tracker's own temporary quota child is excluded from visibility decisions while it is reading. A background Codex process counts as running even if its main window is closed. There is no taskbar injection, browser scraping, automatic update service, or usage prediction based on token pricing. This is an independent utility, not an official OpenAI product.
 

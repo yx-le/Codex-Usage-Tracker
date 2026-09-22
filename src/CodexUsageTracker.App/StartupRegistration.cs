@@ -22,6 +22,12 @@ internal static class StartupRegistration
         var executable = Environment.ProcessPath;
         if (!string.Equals(Path.GetFileName(executable), "CodexUsageTracker.exe", StringComparison.OrdinalIgnoreCase))
             throw new IOException("Use the installed executable to enable startup.");
-        key.SetValue(Name, $"\"{executable}\"", RegistryValueKind.String);
+        key.SetValue(Name, $"\"{executable}\" --watch-codex", RegistryValueKind.String);
+        EnsureWatcher();
+    }
+    public static void EnsureWatcher()
+    {
+        if (Mutex.TryOpenExisting(@"Local\CodexUsageTracker.Watcher", out var active)) { active.Dispose(); return; }
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(Environment.ProcessPath!, "--watch-codex") { UseShellExecute = false, CreateNoWindow = true });
     }
 }

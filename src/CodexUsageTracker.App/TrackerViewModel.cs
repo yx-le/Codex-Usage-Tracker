@@ -15,6 +15,8 @@ public sealed class TrackerViewModel : INotifyPropertyChanged
     public QuotaStatus OverallStatus => (QuotaStatus)Math.Max((int)FiveStatus, (int)WeekStatus);
     public Brush FiveBrush => StatusBrush(FiveStatus, "AccentBrush");
     public Brush WeekBrush => StatusBrush(WeekStatus, "WeekBrush");
+    public Brush EdgeFiveBrush => StatusBrush(FiveStatus, "MutedBrush");
+    public Brush EdgeWeekBrush => StatusBrush(WeekStatus, "MutedBrush");
     public Brush OverallBrush => StatusBrush(OverallStatus, "AccentBrush");
     public bool FiveExhausted => FiveStatus == QuotaStatus.Exhausted;
     public bool WeekExhausted => WeekStatus == QuotaStatus.Exhausted;

@@ -24,6 +24,7 @@ public sealed class TrackerController : IDisposable
     private readonly DispatcherTimer timer;
     private readonly WidgetWindow widget;
     private readonly EdgeBarWindow edgeBar;
+    private readonly TaskbarStatusWindow taskbar;
     private bool edgeAnchor;
     private readonly DetailsWindow details;
     private DateTimeOffset lastAttempt = DateTimeOffset.MinValue;
@@ -39,7 +40,7 @@ public sealed class TrackerController : IDisposable
         Settings = TrackerSettings.Load(settingsPath); App.ApplyTheme(Settings.Theme);
         ViewModel.Settings = Settings;
         repository = new AsyncUsageRepository(Path.Combine(dataDirectory, "usage.db"));
-        widget = new WidgetWindow(this); details = new DetailsWindow(this); edgeBar = new EdgeBarWindow(this);
+        widget = new WidgetWindow(this); details = new DetailsWindow(this); edgeBar = new EdgeBarWindow(this); taskbar = new TaskbarStatusWindow(this);
         tray = new Forms.NotifyIcon { Text = "Codex Usage Tracker", Visible = true, Icon = Drawing.SystemIcons.Information };
         var menu = new RoundedTrayMenu
         {
@@ -90,6 +91,7 @@ public sealed class TrackerController : IDisposable
         if (Settings.EdgeBar && (!Settings.OnlyWhileCodexRunning || running))
         { if (!edgeBar.IsVisible) { edgeBar.Place(); edgeBar.Show(); edgeBar.Place(); } }
         else edgeBar.Hide();
+        if (Settings.TaskbarStatus && (!Settings.OnlyWhileCodexRunning || running)) { if (!taskbar.IsVisible) taskbar.Show(); } else taskbar.Hide();
         if (Settings.OnlyWhileCodexRunning && !running && lastRunning) details.Hide();
         var justStarted = running && !lastRunning; lastRunning = running;
         ViewModel.Notify();
@@ -169,24 +171,12 @@ public sealed class TrackerController : IDisposable
         using var textBrush = new Drawing.SolidBrush(Drawing.Color.White);
         using var format = new Drawing.StringFormat { Alignment = Drawing.StringAlignment.Center, LineAlignment = Drawing.StringAlignment.Center };
         graphics.DrawString(label, font, textBrush, new Drawing.RectangleF(2, 2, 28, 28), format);
-        if (Settings.TrayPercentage)
-        {
-            graphics.Clear(Drawing.Color.Transparent);
-            using var tile = new Drawing.SolidBrush(Drawing.Color.FromArgb(22, 32, 42));
-            graphics.FillRectangle(tile, 0, 0, 32, 32);
-            var weekly = Settings.TrayQuota == "Weekly";
-            var status = weekly ? ViewModel.WeekStatus : ViewModel.FiveStatus;
-            var value = status is QuotaStatus.Unknown or QuotaStatus.ResetDue or QuotaStatus.Stale ? "–" : (weekly ? ViewModel.WeekRemaining : ViewModel.FiveRemaining).Replace("%", "");
-            var tint = ((SolidColorBrush)(weekly ? ViewModel.WeekBrush : ViewModel.FiveBrush)).Color;
-            using var ink = new Drawing.SolidBrush(status is QuotaStatus.Critical or QuotaStatus.Exhausted ? Drawing.Color.FromArgb(255, 113, 140) : status == QuotaStatus.Warning ? Drawing.Color.FromArgb(255, 192, 92) : Drawing.Color.White);
-            using var digits = new Drawing.Font("Segoe UI", value.Length >= 3 ? 19 : 24, Drawing.FontStyle.Bold, Drawing.GraphicsUnit.Pixel);
-            graphics.DrawString(value, digits, ink, new Drawing.RectangleF(-1, 0, 34, 32), format);
-        }
         var handle = bitmap.GetHicon();
         Drawing.Icon next;
         using (var borrowed = Drawing.Icon.FromHandle(handle)) next = (Drawing.Icon)borrowed.Clone();
         DestroyIcon(handle);
         tray.Icon = next; ownedIcon?.Dispose(); ownedIcon = next;
+        taskbar.UpdateStatus(System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(next.Handle, Int32Rect.Empty, System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions()));
     }
     private void UpdateTrayMenu()
     {
@@ -281,6 +271,8 @@ public sealed class TrackerController : IDisposable
                 using var file = File.Create(Path.Combine(directory, name + ".png")); encoder.Save(file);
             }
             Capture("widget", widget); Capture("details", details);
+            PreviewScene.Save(Path.Combine(directory, "widget-context.png"), widget, false);
+            PreviewScene.Save(Path.Combine(directory, "details-context.png"), details, true);
             foreach (var edge in new[] { "Top", "Left", "Right" }) { Settings.Edge = edge; edgeBar.Place(); edgeBar.Show(); edgeBar.Place(); Capture("edge-" + edge, edgeBar); }
             edgeBar.Hide(); Settings.Edge = "Top";
             var windowCount = Application.Current.Windows.Count;
