@@ -14,10 +14,11 @@ public partial class EdgeBarWindow : Window
     {
         var settings = controller.Settings;
         var horizontal = settings.Edge == "Top";
-        Width = horizontal ? 132 : 52; Height = horizontal ? 28 : 62;
-        Quotas.Orientation = horizontal ? Orientation.Horizontal : Orientation.Vertical;
-        FiveBlock.Width = WeekBlock.Width = horizontal ? 54 : 40;
-        FiveBlock.Margin = horizontal ? new Thickness(0, 0, 10, 0) : new Thickness(0, 0, 0, 10);
+        Width = horizontal ? 132 : 28; Height = horizontal ? 28 : 132;
+        EdgeRotation.Angle = horizontal ? 0 : settings.Edge == "Left" ? -90 : 90;
+        Quotas.Orientation = Orientation.Horizontal;
+        FiveBlock.Width = WeekBlock.Width = 54;
+        FiveBlock.Margin = new Thickness(0, 0, 10, 0);
         var screen = Forms.Screen.AllScreens.FirstOrDefault(item => item.DeviceName == settings.EdgeMonitor) ?? Forms.Screen.PrimaryScreen!;
         var dpi = VisualTreeHelper.GetDpi(this); var area = screen.WorkingArea;
         var rect = EdgeBarPlacement.Place(new(area.Left / dpi.DpiScaleX, area.Top / dpi.DpiScaleY, area.Width / dpi.DpiScaleX, area.Height / dpi.DpiScaleY), settings.Edge, settings.EdgeOffset, Width, Height);
@@ -34,7 +35,7 @@ public partial class EdgeBarWindow : Window
         var cursor = Forms.Cursor.Position;
         controller.Settings.Edge = EdgeBarPlacement.NearestEdge(new(work.Left, work.Top, work.Width, work.Height), cursor.X, cursor.Y);
         var horizontal = controller.Settings.Edge == "Top";
-        Width = horizontal ? 132 : 52; Height = horizontal ? 28 : 62;
+        Width = horizontal ? 132 : 28; Height = horizontal ? 28 : 132;
         var span = horizontal ? work.Width / dpi.DpiScaleX - Width : work.Height / dpi.DpiScaleY - Height;
         var position = horizontal ? Left - work.Left / dpi.DpiScaleX : Top - work.Top / dpi.DpiScaleY;
         controller.Settings.EdgeMonitor = screen.DeviceName;

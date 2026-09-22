@@ -25,9 +25,13 @@ Images combine the actual WPF app rendering with an illustrative desktop and syn
 
 ## Display options
 
-The tray uses its original circular status icon. **Show status in the Windows taskbar** adds a separate native taskbar button with remaining-quota progress; its title and hover description contain both quotas. Click it to open details. Right-click the taskbar button and choose **Pin to taskbar** to retain its launcher when the tracker closes. Windows controls icon grouping and whether title text is visible; this does not insert custom text into Explorer or change your taskbar settings.
+**Circle widget** and **Slim edge bar** are equal, independent choices: use either, both, or neither. Both start disabled on fresh installs; existing preferences are preserved. Each has a matching toggle in Settings and the tray menu.
 
-The optional edge bar is 132 × 28 DIPs along the top or 52 × 62 DIPs at a side. Drag near the top, left, or right edge and release: it snaps and adapts automatically, remembering the monitor and position. Its background is **75% transparent**, with quiet neutral quota bars and colored low-quota warnings. Click for details. Disable the floating circle for taskbar-only or edge-bar use. The bar overlays a small part of the desktop; it does not reserve space.
+<img src="docs/images/edge-top.png" alt="Compact top-edge strip with two colored quota bars" /> <img src="docs/images/edge-side.png" alt="Narrow 28-DIP side strip with rotated quota labels" />
+
+The tray uses its original circular status icon. **Show status in the Windows taskbar** adds a separate native taskbar button with two colored quota bars (teal for 5-hour, lavender for weekly) and native warning highlights; its title and hover description contain both quotas. Click it to open details. Right-click the taskbar button and choose **Pin to taskbar** to retain its launcher when the tracker closes. Windows controls icon grouping and whether title text is visible; this does not insert custom text into Explorer or change your taskbar settings.
+
+The optional edge bar is 132 × 28 DIPs along the top or 28 × 132 DIPs at a side. Drag near the top, left, or right edge and release: it snaps and adapts automatically, remembering the monitor and position. Its background is **75% transparent**, with muted teal/lavender quota bars and colored low-quota warnings. Click for details. Disable the floating circle for taskbar-only or edge-bar use. The bar overlays a small part of the desktop; it does not reserve space.
 
 ## Run
 
@@ -108,7 +112,7 @@ docs/                       Architecture and synthetic UI previews
 
 ## Validation and limitations
 
-The implementation was compiled and tested on Windows 11 x64 with .NET SDK 8.0.425. Seventy-four automated tests cover bucket selection, unknown/malformed fields, stale readings, countdown boundaries, alert deduplication, local fallback, SQLite retention, settings recovery, click/drag handling at different display scales, quota status thresholds, non-overlapping panel placement, reset refresh retries through unavailable readings, monitor-gap recovery, and queued history operations under a SQLite write lock. Live app-server retrieval was verified with an existing Codex sign-in. Both themes and the settings panel are rendered for visual checks; widget pixels outside the circular edge are verified transparent. Windows 10 compatibility is targeted but has not been tested on a separate Windows 10 machine.
+The implementation was compiled and tested on Windows 11 x64 with .NET SDK 8.0.425. Seventy-five automated tests cover bucket selection, unknown/malformed fields, stale readings, countdown boundaries, alert deduplication, local fallback, SQLite retention, settings recovery, click/drag handling at different display scales, quota status thresholds, non-overlapping panel placement, reset refresh retries through unavailable readings, monitor-gap recovery, and queued history operations under a SQLite write lock. Live app-server retrieval was verified with an existing Codex sign-in. Both themes and the settings panel are rendered for visual checks; widget pixels outside the circular edge are verified transparent. Windows 10 compatibility is targeted but has not been tested on a separate Windows 10 machine.
 
 Codex process detection recognizes `codex.exe` (desktop app-server or CLI). The tracker's own temporary quota child is excluded from visibility decisions while it is reading. A background Codex process counts as running even if its main window is closed. There is no taskbar injection, browser scraping, automatic update service, or usage prediction based on token pricing. This is an independent utility, not an official OpenAI product.
 

@@ -62,6 +62,8 @@ public partial class App : Application
         Current.Resources["WarningBrush"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(dark ? "#FFC05C" : "#974B00"));
         Current.Resources["CriticalBrush"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(dark ? "#FF718C" : "#AE1638"));
         Current.Resources["EdgeGlassBrush"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(dark ? "#40141E28" : "#40FFFFFF"));
+        Current.Resources["EdgeFiveAccent"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(dark ? "#79C8B6" : "#34786A"));
+        Current.Resources["EdgeWeekAccent"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(dark ? "#A8ACD8" : "#656995"));
     }
 
     protected override void OnExit(ExitEventArgs e)

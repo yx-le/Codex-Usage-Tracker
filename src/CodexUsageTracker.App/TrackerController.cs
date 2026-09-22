@@ -20,6 +20,7 @@ public sealed class TrackerController : IDisposable
     private readonly Forms.ToolStripMenuItem trayQuota;
     private readonly Forms.ToolStripMenuItem trayWeek;
     private readonly Forms.ToolStripMenuItem trayFloating;
+    private readonly Forms.ToolStripMenuItem trayEdge;
     private readonly Forms.NotifyIcon tray;
     private readonly DispatcherTimer timer;
     private readonly WidgetWindow widget;
@@ -59,6 +60,9 @@ public sealed class TrackerController : IDisposable
         trayFloating = new Forms.ToolStripMenuItem("Hide floating circle", null, (_, _) =>
         { Settings.FloatingWidget = !Settings.FloatingWidget; SaveSettings(); });
         menu.Items.Add(trayFloating);
+        trayEdge = new Forms.ToolStripMenuItem("Show slim edge bar", null, (_, _) =>
+        { Settings.EdgeBar = !Settings.EdgeBar; SaveSettings(); });
+        menu.Items.Add(trayEdge);
         menu.Items.Add(new Forms.ToolStripSeparator());
         menu.Items.Add("Quit", null, (_, _) => Application.Current.Shutdown());
         tray.ContextMenuStrip = menu;
@@ -183,6 +187,7 @@ public sealed class TrackerController : IDisposable
         trayQuota.Tag = ViewModel.FiveRemaining;
         trayWeek.Tag = ViewModel.WeekRemaining;
         trayFloating.Text = Settings.FloatingWidget ? "Hide floating circle" : "Show floating circle";
+        trayEdge.Text = Settings.EdgeBar ? "Hide slim edge bar" : "Show slim edge bar";
         if (tray.ContextMenuStrip is { } menu)
         { menu.BackColor = TrayMenuRenderer.Background; menu.ForeColor = TrayMenuRenderer.Foreground; }
     }
@@ -271,6 +276,9 @@ public sealed class TrackerController : IDisposable
                 using var file = File.Create(Path.Combine(directory, name + ".png")); encoder.Save(file);
             }
             Capture("widget", widget); Capture("details", details);
+            var taskbarPreview = new System.Windows.Media.Imaging.PngBitmapEncoder();
+            taskbarPreview.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(TaskbarStatusWindow.CreateQuotaIcon(ViewModel)));
+            using (var iconFile = File.Create(Path.Combine(directory, "taskbar-status.png"))) taskbarPreview.Save(iconFile);
             PreviewScene.Save(Path.Combine(directory, "widget-context.png"), widget, false);
             PreviewScene.Save(Path.Combine(directory, "details-context.png"), details, true);
             foreach (var edge in new[] { "Top", "Left", "Right" }) { Settings.Edge = edge; edgeBar.Place(); edgeBar.Show(); edgeBar.Place(); Capture("edge-" + edge, edgeBar); }

@@ -5,6 +5,11 @@ namespace CodexUsageTracker.Tests;
 
 public class EdgeBarTests
 {
+    [Fact] public void DesktopDisplaysHaveEqualOptInDefaults()
+    {
+        var settings = new TrackerSettings();
+        Assert.False(settings.FloatingWidget); Assert.False(settings.EdgeBar); Assert.True(settings.TaskbarStatus);
+    }
     [Theory]
     [InlineData(500, 10, "Top")]
     [InlineData(8, 400, "Left")]
@@ -19,7 +24,7 @@ public class EdgeBarTests
     public void BarFitsSelectedEdgeAndLeavesRoomForDetails(string edge, double offset)
     {
         var work = new LayoutRect(-1920, 100, 1920, 980);
-        var bar = EdgeBarPlacement.Place(work, edge, offset, edge == "Top" ? 150 : 58, edge == "Top" ? 53 : 108);
+        var bar = EdgeBarPlacement.Place(work, edge, offset, edge == "Top" ? 132 : 28, edge == "Top" ? 28 : 132);
         Assert.True(bar.Left >= work.Left && bar.Right <= work.Right && bar.Top >= work.Top && bar.Bottom <= work.Bottom);
         if (edge == "Top") Assert.Equal(work.Top, bar.Top);
         if (edge == "Left") Assert.Equal(work.Left, bar.Left);

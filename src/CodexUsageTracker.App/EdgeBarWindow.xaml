@@ -1,5 +1,6 @@
 <Window x:Class="CodexUsageTracker.App.EdgeBarWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" WindowStyle="None" ResizeMode="NoResize" AllowsTransparency="True" Background="Transparent" ShowInTaskbar="False" Topmost="True" ShowActivated="False" Title="Codex edge usage bar">
-  <Border Background="{DynamicResource EdgeGlassBrush}" CornerRadius="5" Padding="6,4" MouseLeftButtonDown="MoveOrOpen" Cursor="Hand" AutomationProperties.Name="Codex usage; click for details, drag along screen edge">
+  <Border Width="132" Height="28" Background="{DynamicResource EdgeGlassBrush}" CornerRadius="6" Padding="6,4" MouseLeftButtonDown="MoveOrOpen" Cursor="Hand" AutomationProperties.Name="Codex usage; click for details, drag along screen edge">
+    <Border.LayoutTransform><RotateTransform x:Name="EdgeRotation"/></Border.LayoutTransform>
     <StackPanel x:Name="Quotas" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
       <StackPanel x:Name="FiveBlock" Width="60" Margin="0,0,10,0">
         <TextBlock FontSize="11" HorizontalAlignment="Center"><Run Text="5h " FontSize="9"/><Run Text="{Binding FiveRemaining, Mode=OneWay}"/></TextBlock>
