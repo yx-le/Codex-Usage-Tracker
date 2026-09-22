@@ -1,6 +1,6 @@
 <Window x:Class="CodexUsageTracker.App.EdgeBarWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" WindowStyle="None" ResizeMode="NoResize" AllowsTransparency="True" Background="Transparent" ShowInTaskbar="False" Topmost="True" ShowActivated="False" Title="Codex edge usage bar">
-  <Border Width="132" Height="28" Background="{DynamicResource EdgeGlassBrush}" CornerRadius="6" Padding="6,4" MouseLeftButtonDown="MoveOrOpen" Cursor="Hand" AutomationProperties.Name="Codex usage; click for details, drag along screen edge">
-    <Border.LayoutTransform><RotateTransform x:Name="EdgeRotation"/></Border.LayoutTransform>
+  <Border x:Name="Surface" Background="{DynamicResource EdgeGlassBrush}" CornerRadius="6" Padding="6,4" MouseLeftButtonDown="MoveOrOpen" Cursor="Hand" AutomationProperties.Name="Codex usage; click for details, drag along screen edge">
+    <Grid>
     <StackPanel x:Name="Quotas" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
       <StackPanel x:Name="FiveBlock" Width="60" Margin="0,0,10,0">
         <TextBlock FontSize="11" HorizontalAlignment="Center"><Run Text="5h " FontSize="9"/><Run Text="{Binding FiveRemaining, Mode=OneWay}"/></TextBlock>
@@ -11,5 +11,16 @@
         <ProgressBar Height="2" Margin="0,2,0,0" Maximum="100" Value="{Binding WeekValue, Mode=OneWay}" Foreground="{Binding EdgeWeekBrush}" Background="{Binding WeekTrackBrush}" BorderThickness="0"/>
       </StackPanel>
     </StackPanel>
+    <StackPanel x:Name="SideQuotas" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center" Width="24">
+      <TextBlock Text="5h" FontSize="9" Foreground="{Binding EdgeFiveBrush}" HorizontalAlignment="Center"/>
+      <Viewbox Height="18" StretchDirection="DownOnly"><TextBlock Text="{Binding FiveCompact}" FontFamily="Segoe UI" FontSize="14" FontWeight="SemiBold"/></Viewbox>
+      <TextBlock Text="{Binding FiveUnit}" FontSize="8" Foreground="{DynamicResource MutedBrush}" HorizontalAlignment="Center"/>
+      <ProgressBar Height="2" Margin="2,3,2,0" Maximum="100" Value="{Binding FiveValue, Mode=OneWay}" Foreground="{Binding EdgeFiveBrush}" Background="{Binding FiveTrackBrush}" BorderThickness="0"/>
+      <TextBlock Text="W" FontSize="9" Margin="0,12,0,0" Foreground="{Binding EdgeWeekBrush}" HorizontalAlignment="Center"/>
+      <Viewbox Height="18" StretchDirection="DownOnly"><TextBlock Text="{Binding WeekCompact}" FontFamily="Segoe UI" FontSize="14" FontWeight="SemiBold"/></Viewbox>
+      <TextBlock Text="{Binding WeekUnit}" FontSize="8" Foreground="{DynamicResource MutedBrush}" HorizontalAlignment="Center"/>
+      <ProgressBar Height="2" Margin="2,3,2,0" Maximum="100" Value="{Binding WeekValue, Mode=OneWay}" Foreground="{Binding EdgeWeekBrush}" Background="{Binding WeekTrackBrush}" BorderThickness="0"/>
+    </StackPanel>
+    </Grid>
   </Border>
 </Window>

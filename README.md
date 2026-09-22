@@ -27,11 +27,11 @@ Images combine the actual WPF app rendering with an illustrative desktop and syn
 
 **Circle widget** and **Slim edge bar** are equal, independent choices: use either, both, or neither. Both start disabled on fresh installs; existing preferences are preserved. Each has a matching toggle in Settings and the tray menu.
 
-<img src="docs/images/edge-top.png" alt="Compact top-edge strip with two colored quota bars" /> <img src="docs/images/edge-side.png" alt="Narrow 28-DIP side strip with rotated quota labels" />
+<img src="docs/images/edge-top.png" alt="Compact top-edge strip with two colored quota bars" /> <img src="docs/images/edge-side.png" alt="Narrow 28-DIP side strip with upright quota labels" />
 
 The tray uses its original circular status icon. **Show status in the Windows taskbar** adds a separate native taskbar button with two colored quota bars (teal for 5-hour, lavender for weekly) and native warning highlights; its title and hover description contain both quotas. Click it to open details. Right-click the taskbar button and choose **Pin to taskbar** to retain its launcher when the tracker closes. Windows controls icon grouping and whether title text is visible; this does not insert custom text into Explorer or change your taskbar settings.
 
-The optional edge bar is 132 × 28 DIPs along the top or 28 × 132 DIPs at a side. Drag near the top, left, or right edge and release: it snaps and adapts automatically, remembering the monitor and position. Its background is **75% transparent**, with muted teal/lavender quota bars and colored low-quota warnings. Click for details. Disable the floating circle for taskbar-only or edge-bar use. The bar overlays a small part of the desktop; it does not reserve space.
+The optional edge bar is 132 × 28 DIPs along the top or 28 × 132 DIPs at a side, with upright numbers and separate small percent signs for readability. Drag near the top, left, or right edge and release: it snaps and adapts automatically, remembering the monitor and position. Its background is **75% transparent**, with muted teal/lavender quota bars and colored low-quota warnings. Click for details. Disable the floating circle for taskbar-only or edge-bar use. The bar overlays a small part of the desktop; it does not reserve space.
 
 ## Run
 

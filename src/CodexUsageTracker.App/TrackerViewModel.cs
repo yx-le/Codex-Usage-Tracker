@@ -49,6 +49,10 @@ public sealed class TrackerViewModel : INotifyPropertyChanged
     private bool Valid(QuotaWindow? window) => window is not null && !window.HasExpired(Now);
     public string FiveRemaining => Valid(Snapshot.FiveHour) ? $"{Snapshot.FiveHour!.RemainingPercent:0}%" : "N/A";
     public string WeekRemaining => Valid(Snapshot.Weekly) ? $"{Snapshot.Weekly!.RemainingPercent:0}%" : "N/A";
+    public string FiveCompact => FiveRemaining.TrimEnd('%');
+    public string WeekCompact => WeekRemaining.TrimEnd('%');
+    public string FiveUnit => Valid(Snapshot.FiveHour) ? "%" : "";
+    public string WeekUnit => Valid(Snapshot.Weekly) ? "%" : "";
     public double FiveValue => Valid(Snapshot.FiveHour) ? Snapshot.FiveHour!.RemainingPercent : 0;
     public double WeekValue => Valid(Snapshot.Weekly) ? Snapshot.Weekly!.RemainingPercent : 0;
     public string FiveUsed => Valid(Snapshot.FiveHour) ? $"{Snapshot.FiveHour!.UsedPercent:0}% used" : "Quota unavailable";

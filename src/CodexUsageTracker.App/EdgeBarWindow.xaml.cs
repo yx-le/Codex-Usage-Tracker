@@ -15,7 +15,9 @@ public partial class EdgeBarWindow : Window
         var settings = controller.Settings;
         var horizontal = settings.Edge == "Top";
         Width = horizontal ? 132 : 28; Height = horizontal ? 28 : 132;
-        EdgeRotation.Angle = horizontal ? 0 : settings.Edge == "Left" ? -90 : 90;
+        Surface.Padding = horizontal ? new Thickness(6, 4, 6, 4) : new Thickness(2, 4, 2, 4);
+        Quotas.Visibility = horizontal ? Visibility.Visible : Visibility.Collapsed;
+        SideQuotas.Visibility = horizontal ? Visibility.Collapsed : Visibility.Visible;
         Quotas.Orientation = Orientation.Horizontal;
         FiveBlock.Width = WeekBlock.Width = 54;
         FiveBlock.Margin = new Thickness(0, 0, 10, 0);
