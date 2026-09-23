@@ -18,7 +18,7 @@ Local files live in `%LOCALAPPDATA%\CodexUsageTracker`:
 
 | File | Contents |
 | --- | --- |
-| `settings.json` | UI preferences, thresholds, widget location, optional Codex executable path |
+| `settings.json` + `.bak` recovery copy | UI preferences, thresholds, widget location, optional Codex executable path |
 | `usage.db` (+ SQLite WAL files) | Observation time, source label, used percentages, reset timestamps |
 
 No identity, prompt text, response text, tokens, cookies, or keys are stored by the tracker. Seven-day retention is applied at startup and refresh; if the app is closed, expired records are removed the next time it runs. **Clear local history** removes all readings. The database uses the normal Windows user profile permissions; it is not separately encrypted. History follows this local profile, so clear it when switching Codex accounts if you want separate charts.

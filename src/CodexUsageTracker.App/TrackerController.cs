@@ -32,13 +32,14 @@ public sealed class TrackerController : IDisposable
     private bool disposed, lastRunning;
     private Drawing.Icon? ownedIcon;
     public TrackerSettings Settings { get; private set; }
+    public string PreferencesNotice { get; private set; } = "";
     public TrackerViewModel ViewModel { get; } = new();
 
     public TrackerController(string? dataDirectory = null)
     {
         dataDirectory ??= Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CodexUsageTracker");
         settingsPath = Path.Combine(dataDirectory, "settings.json");
-        Settings = TrackerSettings.Load(settingsPath); App.ApplyTheme(Settings.Theme);
+        Settings = TrackerSettings.Load(settingsPath, out var preferencesNotice); PreferencesNotice = preferencesNotice; App.ApplyTheme(Settings.Theme);
         ViewModel.Settings = Settings;
         repository = new AsyncUsageRepository(Path.Combine(dataDirectory, "usage.db"));
         widget = new WidgetWindow(this); details = new DetailsWindow(this); edgeBar = new EdgeBarWindow(this); taskbar = new TaskbarStatusWindow(this);
@@ -219,6 +220,8 @@ public sealed class TrackerController : IDisposable
     public void ShowUsagePage() => details.ShowUsagePage();
     public void SaveSettings()
     {
+        if (PreferencesNotice.StartsWith("Saved preferences could not", StringComparison.Ordinal))
+        { MessageBox.Show(PreferencesNotice, "Codex Usage Tracker"); return; }
         try { Settings.Save(settingsPath); App.ApplyTheme(Settings.Theme); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme)); widget.Ring.InvalidateVisual(); details.Chart.InvalidateVisual(); edgeBar.Place(); ViewModel.Notify(); UpdateTray(); }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException) { MessageBox.Show("Settings could not be saved. Check folder access.", "Codex Usage Tracker"); }
     }
@@ -227,7 +230,7 @@ public sealed class TrackerController : IDisposable
         try { candidate.Save(settingsPath); }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         { error = "Settings could not be saved. Your edits are still here; check folder access and try again."; return false; }
-        Settings = candidate; ViewModel.Settings = candidate;
+        Settings = candidate; ViewModel.Settings = candidate; PreferencesNotice = "";
         App.ApplyTheme(Settings.Theme); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme));
         widget.Ring.InvalidateVisual(); details.Chart.InvalidateVisual(); edgeBar.Place(); ViewModel.Notify(); UpdateTray();
         error = ""; return true;
@@ -295,6 +298,13 @@ public sealed class TrackerController : IDisposable
                     throw new InvalidOperationException("A failed save must preserve settings and navigation.");
             }
             finally { Directory.Delete(blockedSave); }
+            var page = (SettingsPage)details.SettingsHost.Content;
+            var checkbox = (CheckBox)page.FindName("Floating");
+            checkbox.IsChecked = !original.FloatingWidget;
+            checkbox.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));
+            if (TrackerSettings.Load(settingsPath).FloatingWidget != checkbox.IsChecked)
+                throw new InvalidOperationException("Display change was not automatically persisted.");
+            if (!TrySaveSettings(original, out _)) throw new InvalidOperationException("Preview settings could not be restored.");
             if (!details.IsSettingsPage || Application.Current.Windows.Count != windowCount)
                 throw new InvalidOperationException("Settings must replace usage inside the same window.");
             details.ShowUsagePage();

@@ -17,6 +17,15 @@ public partial class SettingsPage : UserControl
         Executable.Text = settings.CodexExecutable;
         TaskbarEnabled.IsChecked = settings.TaskbarStatus;
         EdgeEnabled.IsChecked = settings.EdgeBar;
+        // Subscribe after initialization: populating controls must never overwrite
+        // the preferences loaded from disk with XAML defaults.
+        foreach (var checkbox in new[] { OnlyRunning, Floating, TaskbarEnabled, EdgeEnabled, Alerts })
+            checkbox.Click += (_, _) => SaveDisplayPreferences();
+        ThemeChoice.SelectionChanged += (_, _) => SaveDisplayPreferences();
+        Warning.TextChanged += (_, _) => SaveAdvancedPreferences();
+        Critical.TextChanged += (_, _) => SaveAdvancedPreferences();
+        Executable.TextChanged += (_, _) => SaveAdvancedPreferences();
+        if (controller.PreferencesNotice.Length > 0) Validation.Text = controller.PreferencesNotice;
     }
     private void Cancel(object sender, RoutedEventArgs e) => controller.ShowUsagePage();
     private void DragWindow(object sender, MouseButtonEventArgs e) { if (e.LeftButton == MouseButtonState.Pressed) Window.GetWindow(this)?.DragMove(); }
@@ -27,19 +36,35 @@ public partial class SettingsPage : UserControl
     }
     private void Save(object sender, RoutedEventArgs e)
     {
+        if (SaveDisplayPreferences() && SaveAdvancedPreferences()) controller.ShowUsagePage();
+    }
+    private bool SaveDisplayPreferences()
+    {
+        var settings = controller.Settings.Copy();
+        settings.TaskbarStatus = TaskbarEnabled.IsChecked == true;
+        settings.EdgeBar = EdgeEnabled.IsChecked == true;
+        settings.OnlyWhileCodexRunning = OnlyRunning.IsChecked == true;
+        settings.FloatingWidget = Floating.IsChecked == true;
+        settings.AlertsEnabled = Alerts.IsChecked == true;
+        settings.Theme = ((ComboBoxItem)ThemeChoice.SelectedItem).Content.ToString()!;
+        return Persist(settings);
+    }
+    private bool SaveAdvancedPreferences()
+    {
         if (!int.TryParse(Warning.Text, out var warning) || !int.TryParse(Critical.Text, out var critical) || critical < 1 || warning > 99 || critical >= warning)
-        { Validation.Text = "Use percentages from 1 to 99; critical must be below warning."; return; }
+        { Validation.Text = "Not saved: use percentages from 1 to 99; critical must be below warning."; return false; }
         var executable = Executable.Text.Trim();
         if (executable.Length > 0 && (!File.Exists(executable) || !string.Equals(Path.GetFileName(executable), "codex.exe", StringComparison.OrdinalIgnoreCase)))
-        { Validation.Text = "Choose an existing codex.exe, or leave the path blank."; return; }
+        { Validation.Text = "Not saved: choose an existing codex.exe, or leave the path blank."; return false; }
         var settings = controller.Settings.Copy();
-        settings.TaskbarStatus = TaskbarEnabled.IsChecked == true; settings.TrayPercentage = false;
-        settings.EdgeBar = EdgeEnabled.IsChecked == true;
-        settings.OnlyWhileCodexRunning = OnlyRunning.IsChecked == true; settings.FloatingWidget = Floating.IsChecked == true;
-        settings.AlertsEnabled = Alerts.IsChecked == true; settings.WarningPercent = warning; settings.CriticalPercent = critical;
-        settings.Theme = ((ComboBoxItem)ThemeChoice.SelectedItem).Content.ToString()!; settings.CodexExecutable = executable;
-        if (!controller.TrySaveSettings(settings, out var error)) { Validation.Text = error; return; }
-        controller.ShowUsagePage();
+        settings.WarningPercent = warning; settings.CriticalPercent = critical; settings.CodexExecutable = executable;
+        return Persist(settings);
+    }
+    private bool Persist(TrackerSettings settings)
+    {
+        if (!controller.TrySaveSettings(settings, out var error)) { Validation.Text = error; return false; }
+        Validation.Text = "Saved automatically";
+        return true;
     }
     private void ChangeStartup(object sender, RoutedEventArgs e)
     {

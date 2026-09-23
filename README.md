@@ -30,7 +30,7 @@ The edge bar is **28 DIPs thick** in either orientation, with upright numbers on
 1. **Get a portable build.** Open [Windows build in GitHub Actions](https://github.com/yx-le/Codex-Usage-Tracker/actions/workflows/build.yml), choose a successful run, and download its **CodexUsageTracker-win-x64** artifact. GitHub may require sign-in. Alternatively, [build from source](docs/DEVELOPMENT.md).
 2. **Extract the whole ZIP** to a permanent folder, then open **CodexUsageTracker.exe**. Keep its companion files together. The package includes the .NET runtime; no administrator access is needed.
 3. **Open Codex and sign in normally.** Click the tracker’s taskbar button or tray icon, then open **Settings** to choose your displays.
-4. **Optional: enable “Automatically launch with Codex.”** A quiet watcher starts at Windows sign-in and launches the tracker when Codex opens. This option saves immediately; other preferences use **Save settings**.
+4. **Optional: enable “Automatically launch with Codex.”** A quiet watcher starts at Windows sign-in and launches the tracker when Codex opens. Preferences save automatically; **Done** closes Settings. Invalid values show an error instead of replacing saved preferences.
 
 If the tray icon is hidden, open Windows’ overflow menu beside the clock. If the tracker cannot find Codex, select the existing **codex.exe** in Settings.
 
@@ -89,7 +89,7 @@ Quota readings and preferences stay in `%LOCALAPPDATA%\CodexUsageTracker`. Histo
 
 ## Development and limitations
 
-The app has **75 automated tests** and has been built and checked on Windows 11 x64. Windows 10 is targeted but has not been tested on a separate machine. Multi-monitor placement has automated layout coverage; physical multi-monitor testing remains limited.
+The app has **79 automated tests** and has been built and checked on Windows 11 x64. Windows 10 is targeted but has not been tested on a separate machine. Multi-monitor placement has automated layout coverage; physical multi-monitor testing remains limited.
 
 A background `codex.exe` counts as running, even if its window is closed. Windows may suppress notification balloons. History follows the local Windows profile, so clear it when switching Codex accounts if you want separate charts. There is no automatic updater or taskbar injection.
 

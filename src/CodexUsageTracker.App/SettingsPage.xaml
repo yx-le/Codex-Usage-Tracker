@@ -4,7 +4,7 @@
         Background="Transparent">
   <Border Background="Transparent">
     <Grid>
-      <Grid.RowDefinitions><RowDefinition Height="48"/><RowDefinition/><RowDefinition Height="54"/></Grid.RowDefinitions>
+      <Grid.RowDefinitions><RowDefinition Height="48"/><RowDefinition/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
       <Grid Background="Transparent" MouseLeftButtonDown="DragWindow">
         <TextBlock Text="Settings" Margin="22,0,0,0" VerticalAlignment="Center" FontSize="16" FontWeight="SemiBold"/>
         <Button Content="← Back" Click="Cancel" AutomationProperties.Name="Back to usage" HorizontalAlignment="Right" Height="34" Margin="0,7,12,7" Background="Transparent"/>
@@ -33,11 +33,11 @@
           <TextBlock Text="PRIVACY" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource MutedBrush}"/>
           <TextBlock Text="Quota readings stay on this PC for 7 days. No telemetry, browser cookies, prompts, or responses are stored." TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" FontSize="11" Margin="0,7,0,0"/>
           <Button Content="Clear local history" Click="ClearHistory" HorizontalAlignment="Left" Margin="0,10,0,0"/>
-          <TextBlock x:Name="Validation" Foreground="{DynamicResource DangerBrush}" TextWrapping="Wrap" Margin="0,10,0,0"/>
+
 
         </StackPanel>
       </ScrollViewer>
-<Button Click="Save" Grid.Row="2" Margin="22,4,22,14" Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentTextBrush}" FontWeight="SemiBold"><TextBlock Text="Save settings" Foreground="{DynamicResource AccentTextBrush}"/></Button>
+<StackPanel Grid.Row="2" Margin="22,4,22,14"><TextBlock x:Name="Validation" Text="Changes save automatically" Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" FontSize="11" Margin="0,0,0,6"/><Button Click="Save" Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentTextBrush}" FontWeight="SemiBold"><TextBlock Text="Done" Foreground="{DynamicResource AccentTextBrush}"/></Button></StackPanel>
     </Grid>
   </Border>
 </UserControl>

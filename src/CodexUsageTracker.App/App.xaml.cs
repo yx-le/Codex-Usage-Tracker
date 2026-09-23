@@ -33,6 +33,8 @@ public partial class App : Application
         {
             var preview = e.Args.Length >= 2 && e.Args[0] == "--render-preview";
             controller = new TrackerController(preview ? Path.Combine(Path.GetFullPath(e.Args[1]), "preview-data") : null);
+            if (e.Args.Length == 2 && e.Args[0] == "--settings-report")
+                File.WriteAllText(e.Args[1], System.Text.Json.JsonSerializer.Serialize(controller.Settings));
             if (preview) controller.RenderPreview(Path.GetFullPath(e.Args[1]), e.Args.Length >= 3 ? e.Args[2] : "Dark");
             else { controller.Start(); if (StartupRegistration.IsEnabled) StartupRegistration.EnsureWatcher(); }
         }
