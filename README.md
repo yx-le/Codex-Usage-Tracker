@@ -1,119 +1,98 @@
 # Codex Usage Tracker
 
-A small, native Windows companion for keeping an eye on your remaining Codex quota. Built with **C# · .NET 8 · WPF** for **Windows 10/11 x64**.
+**Know what is left before you hit a limit.** A lightweight Windows companion that shows your remaining Codex quota, reset times, and recent usage.
 
-The floating circle stays above other windows while Codex is running. Click it for the detailed panel; drag it to move. The outer teal ring shows five-hour quota remaining, the inner purple ring shows weekly quota remaining, and the center shows the five-hour percentage. The circle shows only the percentage and rings, without a status caption. Dashed rings indicate stale readings. The rounded, neutral tray menu remains available when the circle is hidden.
+Windows 10/11 x64 · C# / .NET 8 / WPF · Local history · No API key
 
-<img src="docs/images/widget.png" width="960" alt="Circular quota widget in an illustrative desktop workspace" />
-<img src="docs/images/details.png" width="960" alt="Detailed quota panel over an illustrative desktop workspace" />
+[Get started](#get-started) · [Choose your display](#choose-your-display) · [Read the numbers](#read-the-numbers) · [Privacy](#privacy) · [Build from source](docs/DEVELOPMENT.md)
 
-Images combine the actual WPF app rendering with an illustrative desktop and synthetic quota values; no private desktop content or account data is captured.
+<img src="docs/images/display-guide.png" width="1280" alt="Three display choices: a movable circle, a slim bar that adapts to the top or sides, and a separate Windows taskbar button. Circle and edge bar can be enabled independently." />
 
-## Features
+## Choose your display
 
-- Always-on-top circular widget with a clean circular edge and no clipped shadow; click or keyboard-activate to open details. Hold and drag anywhere on the circle to move it; the position is saved on release. Dragging never opens the details panel.
-- Borderless translucent panels with 40% desktop visibility, rounded glass cards, and light/dark palettes. A single 26-DIP clip keeps the background and content corners aligned; text and controls retain their own opacity.
-- Theme-aware system tray menu with aligned quota values, refresh, visibility toggle, settings, and quit; a clear status ring replaces the miniature double-ring icon.
-- By default the circle is visible only while a Codex process runs; tray-only and always-visible modes are configurable.
-- Five-hour and weekly **remaining** quota, used percentages, and reset countdowns.
-- Pace estimate comparing quota consumed with elapsed time in each reported window.
-- Local SQLite history, retained for **seven days**; chart leaves gaps across missing readings and resets.
-- Configurable warning and critical alerts, defaulting to **25%** and **10%** remaining. Rings and bars turn amber/red; exhausted quota keeps a full red outline at 0%. Persistent panel warnings remain visible even if Windows suppresses notifications.
-- Light, dark, and system appearance; remembered widget position. Settings replaces usage in the same frame with Back navigation. The panel chooses an available side of the circle and follows it when dragged; no widget hover tooltip.
-- Explicit LIVE, LOCAL, STALE, RESET DUE, and N/A states, plus last-reading timestamp and source details.
-- No API key, browser cookies, tracker telemetry, or prompt/response storage.
+Use **Circle widget**, **Slim edge bar**, or both. Prefer a clear desktop? Leave both off and use the taskbar. The two desktop displays have equal controls in **Settings** and the tray menu.
 
-## Display options
+| Display | What you see | How you use it |
+| --- | --- | --- |
+| **Circle widget** | Five-hour percentage, with an outer five-hour ring and inner weekly ring | Drag to move; click for details |
+| **Slim edge bar** | Both remaining percentages, with teal and lavender bars | Drag near the top, left, or right edge; release to snap and adapt |
+| **Windows taskbar** | A native button with two compact quota bars; warning highlights when low | Hover for both quotas; click for details; right-click to pin |
+| **System tray** | A circular status icon and quick-action menu | Open details, refresh, change displays, or quit |
 
-**Circle widget** and **Slim edge bar** are equal, independent choices: use either, both, or neither. Both start disabled on fresh installs; existing preferences are preserved. Each has a matching toggle in Settings and the tray menu.
+**Fresh-install defaults:** taskbar status on; circle and edge bar off. Existing preferences are preserved. By default, displays appear only while Codex is running; the tray remains available.
 
-<img src="docs/images/edge-top.png" alt="Compact top-edge strip with two colored quota bars" /> <img src="docs/images/edge-side.png" alt="Narrow 28-DIP side strip with upright quota labels" />
+The edge bar is **28 DIPs thick** in either orientation, with upright numbers on the sides and a **75%-transparent background**. Windows scales it with your display settings. It overlays a small part of the desktop rather than reserving screen space.
 
-The tray uses its original circular status icon. **Show status in the Windows taskbar** adds a separate native taskbar button with two colored quota bars (teal for 5-hour, lavender for weekly) and native warning highlights; its title and hover description contain both quotas. Click it to open details. Right-click the taskbar button and choose **Pin to taskbar** to retain its launcher when the tracker closes. Windows controls icon grouping and whether title text is visible; this does not insert custom text into Explorer or change your taskbar settings.
+> **Taskbar ≠ system tray.** The taskbar button is separate from the icon beside the clock. Windows controls taskbar grouping and title visibility. Choose **Pin to taskbar** yourself to keep its launcher after the app closes; the tracker does not change your taskbar settings.
 
-The optional edge bar is 132 × 28 DIPs along the top or 28 × 132 DIPs at a side, with upright numbers and separate small percent signs for readability. Drag near the top, left, or right edge and release: it snaps and adapts automatically, remembering the monitor and position. Its background is **75% transparent**, with muted teal/lavender quota bars and colored low-quota warnings. Click for details. Disable the floating circle for taskbar-only or edge-bar use. The bar overlays a small part of the desktop; it does not reserve space.
+## Get started
 
-## Run
+1. **Get a portable build.** Open [Windows build in GitHub Actions](https://github.com/yx-le/Codex-Usage-Tracker/actions/workflows/build.yml), choose a successful run, and download its **CodexUsageTracker-win-x64** artifact. GitHub may require sign-in. Alternatively, [build from source](docs/DEVELOPMENT.md).
+2. **Extract the whole ZIP** to a permanent folder, then open **CodexUsageTracker.exe**. Keep its companion files together. The package includes the .NET runtime; no administrator access is needed.
+3. **Open Codex and sign in normally.** Click the tracker’s taskbar button or tray icon, then open **Settings** to choose your displays.
+4. **Optional: enable “Automatically launch with Codex.”** A quiet watcher starts at Windows sign-in and launches the tracker when Codex opens. This option saves immediately; other preferences use **Save settings**.
 
-Extract the Windows portable package and open **CodexUsageTracker.exe**. The self-contained package includes the .NET runtime and does not require administrator access. Keep its companion files together.
+If the tray icon is hidden, open Windows’ overflow menu beside the clock. If the tracker cannot find Codex, select the existing **codex.exe** in Settings.
 
-Sign in to Codex normally. The tracker uses Codex's existing sign-in through its app-server; it never reads or copies the credential files itself. If automatic executable discovery fails, select `codex.exe` in **Settings**.
+## Read the numbers
 
-Click the tray icon or the floating circle to open the panel. Escape returns from Settings to usage; otherwise Escape or the panel's close button collapses it. Use **Quit** in the tray menu to exit the app. The circle uses a fixed 96-DIP footprint and follows Windows DPI scaling. Windows may initially place the tray icon in its overflow area.
+**Percentages show quota remaining, not quota consumed.** For example, **73% remaining means 27% used**. Five-hour and weekly quotas are separate; each has its own reset time.
 
-Enable **Automatically launch with Codex** in Settings. A quiet per-user watcher starts at Windows sign-in and checks for Codex every two seconds. It launches the tracker when Codex opens, including when Codex is already open at watcher startup. Choosing Quit suppresses relaunch for that Codex session; opening Codex again launches the tracker again. Disable the option to remove the startup entry and stop the watcher. Keep the portable folder in place, or toggle the option off/on after moving it.
+<img src="docs/images/reading-guide.png" width="1280" alt="Annotated reading guide beside the actual details panel: compare both limits, check reset countdowns, understand pace, and inspect seven-day history and source freshness." />
 
-## Build and test
-
-Install the **.NET 8 SDK** on Windows (8.0.400 or later in the .NET 8 family), then run:
-
-```powershell
-dotnet restore CodexUsageTracker.sln
-dotnet build CodexUsageTracker.sln -c Release --no-restore
-dotnet test CodexUsageTracker.sln -c Release --no-build
-dotnet run --project src/CodexUsageTracker.App -c Release
-```
-
-Create a portable x64 build:
-
-```powershell
-dotnet publish src/CodexUsageTracker.App -c Release -r win-x64 --self-contained true -o artifacts/win-x64
-```
-
-The GitHub Actions workflow builds, tests, and uploads a portable Windows artifact. `.gitignore` excludes build outputs, local settings, databases, logs, and environment files.
-
-Optional explicit live integration probe (prints quota fields only):
-
-```powershell
-dotnet run --project tools/CodexUsageTracker.Probe -- "C:\path\to\codex.exe"
-```
-
-Optional isolated UI render check (synthetic data; no quota request):
-
-```powershell
-dotnet run --project src/CodexUsageTracker.App -- --render-preview "C:\temp\tracker-preview" Dark
-```
-
-Use `Light` for the second theme. The preview creates isolated temporary settings/history beside its images. Close a running tracker first because the app is single-instance.
-
-## Data sources and privacy
-
-1. **Codex app-server.** A short-lived `codex app-server --listen stdio://` child performs the `initialize` / `initialized` handshake and calls only `account/rateLimits/read`. The tracker explicitly disables analytics and OpenTelemetry exporters on this child. It does not create threads, run prompts, reset credits, or modify account settings. The child is terminated after the read or a 20-second timeout.
-2. **Local Codex fallback.** If app-server data is unavailable, inspect the final 1 MiB of up to 24 recent session JSONL files under `$CODEX_HOME/sessions` or `~/.codex/sessions`. Only `event_msg` / `token_count` records with `rate_limits` are converted into quota measurements. Existing session files contain other content; the tracker transiently scans lines but does not retain, log, display, or copy prompt/response content. Their format is not a stable public API.
-3. **N/A.** If neither source yields a supported quota window, display N/A. Never infer a quota percentage from tokens or assume that missing data means zero usage.
-
-The multi-bucket response's `codex` entry takes precedence. Other model-specific buckets are not substituted. Durations must explicitly match 300 or 10,080 minutes; unsupported or missing durations remain N/A. Missing reset times remain unknown. A past reset becomes “Reset due · awaiting update,” not an assumed quota refill.
-
-Quota refresh runs every 60 seconds while Codex runs; the countdown updates every second. A known reset triggers an immediate refresh, with a 15-second retry followed by 60-second retries if the source still reports the expired window. Pending resets survive unavailable or partial readings until a later reset is reported for that quota window; abandoned retries expire after eight days. Reads never overlap and an expired reading never implies a refill. Manual refresh works from the tray or panel. Data older than three minutes is STALE. Local fallback is always labelled cached/local. Low-quota alerts only use fresh app-server readings and are deduplicated per threshold and reset window during the running session. Restarting the tracker can repeat a still-applicable warning. Windows notification settings may suppress tray balloons.
-
-The pace estimate extrapolates the window-average usage rate. “Above sustainable pace” means projected consumption exceeds 105% of the quota by reset, allowing a small tolerance. It is unavailable for stale, expired, or unknown-reset data and says “Learning pace” during the first five minutes. It is advisory; it cannot predict future work.
-
-Local files live in `%LOCALAPPDATA%\CodexUsageTracker`:
-
-| File | Contents |
+| Signal | Meaning |
 | --- | --- |
-| `settings.json` | UI preferences, thresholds, widget location, optional Codex executable path |
-| `usage.db` (+ SQLite WAL files) | Observation time, source label, used percentages, reset timestamps |
+| **Teal / lavender** | Five-hour / weekly quota |
+| **Amber** | Low quota: 25% or less remaining by default |
+| **Red** | Critical quota: 10% or less remaining by default; 0% is exhausted |
+| **Dashed circle rings** | The reading is stale, not a fresh quota measurement |
+| **LIVE / LOCAL** | Current app-server reading / cached local fallback |
+| **STALE / RESET DUE / N/A** | Old reading / awaiting reset confirmation / no supported reading available |
 
-No identity, prompt text, response text, tokens, cookies, or keys are stored by the tracker. Seven-day retention is applied at startup and refresh; if the app is closed, expired records are removed the next time it runs. **Clear local history** removes all readings. The database uses the normal Windows user profile permissions; it is not separately encrypted. History follows this local profile, so clear it when switching Codex accounts if you want separate charts.
+Warning thresholds are configurable. At 0%, a red outline or track keeps the warning visible even though no allowance remains. The exact percentage is the value to read.
 
-The tracker has no direct HTTP client or telemetry endpoint. Codex itself contacts its services to retrieve quota; that connection is necessary for live readings.
+The panel also shows a **pace estimate**, **seven days of local history**, and the **source and last-update time**. Pace is an estimate based on elapsed time and usage so far, not a prediction of future work.
 
-## Project structure
+## Everyday behavior
 
-```text
-src/CodexUsageTracker.Core/   Quota parsing, source adapters, pacing, alerts, SQLite, settings
-src/CodexUsageTracker.App/    WPF windows, tray integration, theme, polling lifecycle
-tests/CodexUsageTracker.Tests/  Parsing, fallback, retention, alerts, settings tests
-tools/CodexUsageTracker.Probe/  Explicit live app-server integration check
-.github/workflows/build.yml  Windows build, tests, portable artifact
-docs/                       Architecture and synthetic UI previews
-```
+- **Refresh:** readings update about every 60 seconds while Codex runs. A due reset triggers a fresh request, with retries if needed. Manual refresh is available in the panel and tray menu.
+- **Open and close:** click a display for details. Escape returns from Settings to usage, then hides the panel. Settings replaces the usage page within the same frame.
+- **Automatic startup:** the watcher checks for Codex every two seconds. Choosing **Quit** stops the tracker for that Codex session; after Codex fully exits and starts again, the watcher launches it again. Disable automatic launch in Settings to stop the watcher.
+- **Move the portable folder:** toggle automatic launch off before moving it, then on again from the new location.
+- **Appearance:** choose Light, Dark, or System. Display positions and preferences are remembered.
 
-## Validation and limitations
+## See it in context
 
-The implementation was compiled and tested on Windows 11 x64 with .NET SDK 8.0.425. Seventy-five automated tests cover bucket selection, unknown/malformed fields, stale readings, countdown boundaries, alert deduplication, local fallback, SQLite retention, settings recovery, click/drag handling at different display scales, quota status thresholds, non-overlapping panel placement, reset refresh retries through unavailable readings, monitor-gap recovery, and queued history operations under a SQLite write lock. Live app-server retrieval was verified with an existing Codex sign-in. Both themes and the settings panel are rendered for visual checks; widget pixels outside the circular edge are verified transparent. Windows 10 compatibility is targeted but has not been tested on a separate Windows 10 machine.
+<details>
+<summary>Circle widget beside a workspace</summary>
 
-Codex process detection recognizes `codex.exe` (desktop app-server or CLI). The tracker's own temporary quota child is excluded from visibility decisions while it is reading. A background Codex process counts as running even if its main window is closed. There is no taskbar injection, browser scraping, automatic update service, or usage prediction based on token pricing. This is an independent utility, not an official OpenAI product.
+<img src="docs/images/widget.png" width="1280" alt="The small circular widget positioned beside an illustrative workspace, leaving the document unobstructed." />
 
-Protocol reference: [Official Codex app-server documentation](https://developers.openai.com/codex/app-server).
+</details>
+
+<details>
+<summary>Detailed panel over a workspace</summary>
+
+<img src="docs/images/details.png" width="1280" alt="The translucent details panel over an illustrative workspace, showing remaining quota, resets, history, and source information." />
+
+</details>
+
+Illustrations use actual app renders with synthetic values. Desktop scenes and taskbar arrangements are illustrative; close-ups may be enlarged. No private windows or account data are shown.
+
+## Privacy
+
+**No browser cookies, API key, tracker telemetry, or prompt/response storage.** Source priority is **Codex app-server → local Codex fallback → N/A**. Missing data is never treated as zero usage or a confirmed refill.
+
+Quota readings and preferences stay in `%LOCALAPPDATA%\CodexUsageTracker`. History is retained for seven days and can be cleared in Settings. The fallback scans existing local session records to find quota fields; it does not retain their conversation content. Codex itself contacts its services for live readings.
+
+[Data handling, retention, and source details](docs/DATA-AND-PRIVACY.md)
+
+## Development and limitations
+
+The app has **75 automated tests** and has been built and checked on Windows 11 x64. Windows 10 is targeted but has not been tested on a separate machine. Multi-monitor placement has automated layout coverage; physical multi-monitor testing remains limited.
+
+A background `codex.exe` counts as running, even if its window is closed. Windows may suppress notification balloons. History follows the local Windows profile, so clear it when switching Codex accounts if you want separate charts. There is no automatic updater or taskbar injection.
+
+[Build, test, and preview](docs/DEVELOPMENT.md) · [Architecture](docs/ARCHITECTURE.md) · [Rebuild README illustrations](docs/render-readme.ps1)
+
+This is an independent utility, not an official OpenAI product.
