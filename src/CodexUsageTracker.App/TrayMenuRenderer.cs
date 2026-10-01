@@ -47,7 +47,16 @@ internal sealed class TrayMenuRenderer : Forms.ToolStripProfessionalRenderer
         // Use the native text/shortcut columns so both contribute to menu sizing.
         // Moving the rectangle without shrinking it could paint past the menu edge.
         var inset = 8 * (e.ToolStrip?.DeviceDpi ?? 96) / 96;
-        if ((format & Forms.TextFormatFlags.Right) == 0)
+        if (e.Item is Forms.ToolStripMenuItem item &&
+            !string.IsNullOrEmpty(item.ShortcutKeyDisplayString) && e.Text == item.ShortcutKeyDisplayString)
+        {
+            // Native shortcut sizing reserves space for the values; extend their
+            // drawing column to the visible row edge when the menu is wider.
+            var right = Math.Min(item.Width, (e.ToolStrip?.ClientSize.Width ?? item.Width) - item.Bounds.Left) - 2 * inset;
+            bounds.Width = Math.Max(0, right - bounds.Left);
+            format |= Forms.TextFormatFlags.Right;
+        }
+        else if ((format & Forms.TextFormatFlags.Right) == 0)
         { bounds.X += inset; bounds.Width = Math.Max(0, bounds.Width - inset); }
         Forms.TextRenderer.DrawText(e.Graphics, e.Text, e.TextFont, bounds, e.TextColor, format);
     }
@@ -61,6 +70,14 @@ internal sealed class TrayMenuRenderer : Forms.ToolStripProfessionalRenderer
 
 internal sealed class RoundedTrayMenu : Forms.ContextMenuStrip
 {
+    protected override void OnLayout(Forms.LayoutEventArgs e)
+    {
+        base.OnLayout(e);
+        // ContextMenuStrip does not stretch rows to its MinimumSize automatically.
+        foreach (Forms.ToolStripItem item in Items)
+            item.Width = DisplayRectangle.Width;
+    }
+
     protected override void OnSizeChanged(EventArgs e)
     {
         base.OnSizeChanged(e);
