@@ -70,9 +70,7 @@ public sealed class TrackerController : IDisposable
         foreach (Forms.ToolStripItem item in menu.Items)
         {
             item.Padding = item is Forms.ToolStripSeparator ? new Forms.Padding(0, 4, 0, 4) : new Forms.Padding(10, 5, 10, 5);
-            var preferred = item.GetPreferredSize(Drawing.Size.Empty);
-            item.AutoSize = false;
-            item.Size = new Drawing.Size(244 * menu.DeviceDpi / 96, preferred.Height);
+            item.AutoSize = true;
         }
         menu.Opening += (_, _) => UpdateTrayMenu();
         tray.MouseClick += (_, e) => { if (e.Button == Forms.MouseButtons.Left) ToggleDetails(); };
@@ -185,8 +183,8 @@ public sealed class TrackerController : IDisposable
     }
     private void UpdateTrayMenu()
     {
-        trayQuota.Tag = ViewModel.FiveRemaining;
-        trayWeek.Tag = ViewModel.WeekRemaining;
+        trayQuota.ShortcutKeyDisplayString = ViewModel.FiveRemaining;
+        trayWeek.ShortcutKeyDisplayString = ViewModel.WeekRemaining;
         trayFloating.Text = Settings.FloatingWidget ? "Hide floating circle" : "Show floating circle";
         trayEdge.Text = Settings.EdgeBar ? "Hide slim edge bar" : "Show slim edge bar";
         if (tray.ContextMenuStrip is { } menu)
@@ -321,7 +319,14 @@ public sealed class TrackerController : IDisposable
             ViewModel.Snapshot = fresh; ViewModel.Notify();
             if (tray.ContextMenuStrip is { } menu)
             {
+                // Exercise the widest quota string before capturing the actual native menu.
+                trayQuota.ShortcutKeyDisplayString = "100%";
+                trayWeek.ShortcutKeyDisplayString = "100%";
                 menu.CreateControl(); menu.Size = menu.GetPreferredSize(Drawing.Size.Empty);
+                menu.PerformLayout();
+                foreach (Forms.ToolStripItem item in menu.Items)
+                    if (item.Bounds.Right > menu.ClientSize.Width || item.Bounds.Left < 0)
+                        throw new InvalidOperationException("Tray menu item extends beyond the visible menu.");
                 using var bitmap = new Drawing.Bitmap(menu.Width, menu.Height);
                 menu.DrawToBitmap(bitmap, new Drawing.Rectangle(Drawing.Point.Empty, bitmap.Size));
                 bitmap.Save(Path.Combine(directory, "tray-menu.png"), Drawing.Imaging.ImageFormat.Png);

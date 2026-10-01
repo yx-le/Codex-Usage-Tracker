@@ -44,12 +44,12 @@ internal sealed class TrayMenuRenderer : Forms.ToolStripProfessionalRenderer
         e.TextColor = e.Item.Enabled ? Foreground : Dark ? Drawing.Color.FromArgb(163, 163, 163) : Drawing.Color.FromArgb(103, 103, 103);
         var bounds = e.TextRectangle;
         var format = e.TextFormat;
-        bounds.Offset(8, 0);
+        // Use the native text/shortcut columns so both contribute to menu sizing.
+        // Moving the rectangle without shrinking it could paint past the menu edge.
+        var inset = 8 * (e.ToolStrip?.DeviceDpi ?? 96) / 96;
+        if ((format & Forms.TextFormatFlags.Right) == 0)
+        { bounds.X += inset; bounds.Width = Math.Max(0, bounds.Width - inset); }
         Forms.TextRenderer.DrawText(e.Graphics, e.Text, e.TextFont, bounds, e.TextColor, format);
-        if (e.Item.Tag is string value)
-            Forms.TextRenderer.DrawText(e.Graphics, value, e.TextFont,
-                new Drawing.Rectangle(10, 0, e.Item.Width - 28, e.Item.Height), e.TextColor,
-                Forms.TextFormatFlags.Right | Forms.TextFormatFlags.VerticalCenter | Forms.TextFormatFlags.SingleLine);
     }
     protected override void OnRenderSeparator(Forms.ToolStripSeparatorRenderEventArgs e)
     {
