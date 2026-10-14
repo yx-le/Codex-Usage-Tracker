@@ -11,6 +11,7 @@ public partial class DetailsWindow : Window
         InitializeComponent(); this.controller = controller; DataContext = controller.ViewModel;
         GlassWindow.Enable(this, () => App.IsDarkTheme(controller.Settings.Theme));
         Closing += HideInsteadOfClose;
+        UsageContent.SizeChanged += (_, _) => controller.RepositionPanel();
     }
     private void HideInsteadOfClose(object? sender, CancelEventArgs e) { e.Cancel = true; Hide(); }
     private async void Refresh(object sender, RoutedEventArgs e) => await controller.RefreshAsync();
@@ -29,11 +30,22 @@ public partial class DetailsWindow : Window
         UsagePage.Visibility = Visibility.Collapsed;
         SettingsHost.Content = new SettingsPage(controller);
         SettingsHost.Visibility = Visibility.Visible;
+        controller.RepositionPanel();
     }
     public void ShowUsagePage()
     {
         SettingsHost.Visibility = Visibility.Collapsed; SettingsHost.Content = null;
         UsagePage.Visibility = Visibility.Visible;
+        controller.RepositionPanel();
+    }
+    public double PreferredHeight(double width)
+    {
+        // Measure the full page rather than a fixed viewport. The placement helper
+        // limits the resulting window only when the monitor cannot fit the content.
+        var content = IsSettingsPage && SettingsHost.Content is SettingsPage settings
+            ? (FrameworkElement)settings.FindName("SettingsContent") : UsageContent;
+        content.Measure(new Size(Math.Max(1, width - 7), double.PositiveInfinity));
+        return Math.Max(790, Math.Ceiling(content.DesiredSize.Height) + (IsSettingsPage ? 134 : 98));
     }
     public void SetHistory(IReadOnlyList<UsageSnapshot> samples) { Chart.Samples = samples; Chart.InvalidateVisual(); }
 }

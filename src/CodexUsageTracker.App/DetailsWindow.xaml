@@ -19,8 +19,8 @@
         </Border>
         <Button HorizontalAlignment="Right" Width="34" Height="34" Margin="0,5,8,5" Padding="0" Background="Transparent" Content="×" FontSize="22" FontWeight="Light" ToolTip="Collapse" AutomationProperties.Name="Collapse usage details" Click="Collapse"/>
       </Grid>
-      <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,7,0">
-        <StackPanel Margin="22,4,15,22">
+      <ScrollViewer x:Name="UsageScroll" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,7,0">
+        <StackPanel x:Name="UsageContent" Margin="22,4,15,22">
           <DockPanel Margin="0,0,0,14">
             <StackPanel>
               <TextBlock Text="Quota remaining" FontSize="25" FontWeight="SemiBold"/>

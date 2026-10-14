@@ -210,7 +210,7 @@ public sealed class TrackerController : IDisposable
         var work = new LayoutRect(area.Left / dpi.DpiScaleX, area.Top / dpi.DpiScaleY, area.Width / dpi.DpiScaleX, area.Height / dpi.DpiScaleY);
         var anchor = new LayoutRect(anchorWindow.Left, anchorWindow.Top, anchorWindow.Width, anchorWindow.Height);
         if (!anchorWindow.IsVisible) anchor = new LayoutRect(work.Right - 96, work.Bottom - 96, 96, 96);
-        var placement = PanelPlacement.Beside(work, anchor, 420, 790);
+        var placement = PanelPlacement.Beside(work, anchor, 420, details.PreferredHeight(Math.Min(420, work.Width)));
         details.Width = placement.Width; details.Height = placement.Height;
         details.Left = placement.Left; details.Top = placement.Top;
     }
