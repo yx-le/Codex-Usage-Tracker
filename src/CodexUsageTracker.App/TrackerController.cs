@@ -39,7 +39,7 @@ public sealed class TrackerController : IDisposable
     {
         dataDirectory ??= Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CodexUsageTracker");
         settingsPath = Path.Combine(dataDirectory, "settings.json");
-        Settings = TrackerSettings.Load(settingsPath, out var preferencesNotice); PreferencesNotice = preferencesNotice; App.ApplyTheme(Settings.Theme);
+        Settings = TrackerSettings.Load(settingsPath, out var preferencesNotice); PreferencesNotice = preferencesNotice; App.ApplyTheme(Settings.Theme, Settings);
         ViewModel.Settings = Settings;
         repository = new AsyncUsageRepository(Path.Combine(dataDirectory, "usage.db"));
         widget = new WidgetWindow(this); details = new DetailsWindow(this); edgeBar = new EdgeBarWindow(this); taskbar = new TaskbarStatusWindow(this);
@@ -220,7 +220,7 @@ public sealed class TrackerController : IDisposable
     {
         if (PreferencesNotice.StartsWith("Saved preferences could not", StringComparison.Ordinal))
         { MessageBox.Show(PreferencesNotice, "Codex Usage Tracker"); return; }
-        try { Settings.Save(settingsPath); App.ApplyTheme(Settings.Theme); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme)); widget.Ring.InvalidateVisual(); details.Chart.InvalidateVisual(); edgeBar.Place(); ViewModel.Notify(); UpdateTray(); }
+        try { Settings.Save(settingsPath); App.ApplyTheme(Settings.Theme, Settings); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme)); widget.Ring.InvalidateVisual(); details.Chart.InvalidateVisual(); edgeBar.Place(); ViewModel.Notify(); UpdateTray(); }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException) { MessageBox.Show("Settings could not be saved. Check folder access.", "Codex Usage Tracker"); }
     }
     public bool TrySaveSettings(TrackerSettings candidate, out string error)
@@ -229,7 +229,7 @@ public sealed class TrackerController : IDisposable
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         { error = "Settings could not be saved. Your edits are still here; check folder access and try again."; return false; }
         Settings = candidate; ViewModel.Settings = candidate; PreferencesNotice = "";
-        App.ApplyTheme(Settings.Theme); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme));
+        App.ApplyTheme(Settings.Theme, Settings); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme));
         widget.Ring.InvalidateVisual(); details.Chart.InvalidateVisual(); edgeBar.Place(); ViewModel.Notify(); UpdateTray();
         error = ""; return true;
     }
@@ -253,13 +253,13 @@ public sealed class TrackerController : IDisposable
             if (clear) throw;
         }
     }
-    private void OnSystemPreferenceChanged(object sender, UserPreferenceChangedEventArgs e) => Application.Current.Dispatcher.BeginInvoke(() => { App.ApplyTheme(Settings.Theme); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme)); widget.Ring.InvalidateVisual(); details.Chart.InvalidateVisual(); });
+    private void OnSystemPreferenceChanged(object sender, UserPreferenceChangedEventArgs e) => Application.Current.Dispatcher.BeginInvoke(() => { App.ApplyTheme(Settings.Theme, Settings); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme)); widget.Ring.InvalidateVisual(); details.Chart.InvalidateVisual(); });
     private void OnDisplayChanged(object? sender, EventArgs e) => Application.Current.Dispatcher.BeginInvoke(() => { widget.ClampPosition(); edgeBar.Place(); RepositionPanel(); });
 
     public void RenderPreview(string directory, string theme = "Dark")
     {
         Directory.CreateDirectory(directory);
-        Settings.Theme = theme; App.ApplyTheme(theme);
+        Settings.Theme = theme; App.ApplyTheme(theme, Settings);
         Settings.OnlyWhileCodexRunning = false;
         var now = DateTimeOffset.UtcNow;
         ViewModel.Snapshot = new(now, "Preview · synthetic data", new(27, 300, now.AddHours(3)), new(58, 10080, now.AddDays(3)));
@@ -302,6 +302,16 @@ public sealed class TrackerController : IDisposable
             checkbox.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));
             if (TrackerSettings.Load(settingsPath).FloatingWidget != checkbox.IsChecked)
                 throw new InvalidOperationException("Display change was not automatically persisted.");
+            foreach (var (control, resource) in new[] { ("CircleTransparency", "CircleGlassBrush"), ("EdgeTransparency", "EdgeGlassBrush"), ("PanelTransparency", "GlassBrush") })
+            {
+                ((Slider)page.FindName(control)).Value = 64;
+                var saved = TrackerSettings.Load(settingsPath);
+                if (saved.CircleTransparency != Settings.CircleTransparency || saved.EdgeTransparency != Settings.EdgeTransparency || saved.PanelTransparency != Settings.PanelTransparency ||
+                    ((SolidColorBrush)Application.Current.Resources[resource]).Color.A != 92 ||
+                    ((SolidColorBrush)Application.Current.Resources["TextBrush"]).Color.A != 255)
+                    throw new InvalidOperationException("Transparency must preview live, preserve text, and save immediately.");
+            }
+            Capture("settings-transparency", details);
             if (!TrySaveSettings(original, out _)) throw new InvalidOperationException("Preview settings could not be restored.");
             if (!details.IsSettingsPage || Application.Current.Windows.Count != windowCount)
                 throw new InvalidOperationException("Settings must replace usage inside the same window.");

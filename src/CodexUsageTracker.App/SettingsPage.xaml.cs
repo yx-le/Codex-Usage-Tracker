@@ -17,17 +17,29 @@ public partial class SettingsPage : UserControl
         Executable.Text = settings.CodexExecutable;
         TaskbarEnabled.IsChecked = settings.TaskbarStatus;
         EdgeEnabled.IsChecked = settings.EdgeBar;
+        CircleTransparency.Value = settings.CircleTransparency;
+        EdgeTransparency.Value = settings.EdgeTransparency;
+        PanelTransparency.Value = settings.PanelTransparency;
+        UpdateTransparencyLabels();
         // Subscribe after initialization: populating controls must never overwrite
         // the preferences loaded from disk with XAML defaults.
         foreach (var checkbox in new[] { OnlyRunning, Floating, TaskbarEnabled, EdgeEnabled, Alerts })
             checkbox.Click += (_, _) => SaveDisplayPreferences();
         ThemeChoice.SelectionChanged += (_, _) => SaveDisplayPreferences();
+        foreach (var slider in new[] { CircleTransparency, EdgeTransparency, PanelTransparency })
+            slider.ValueChanged += (_, _) => { UpdateTransparencyLabels(); SaveDisplayPreferences(); };
         Warning.TextChanged += (_, _) => SaveAdvancedPreferences();
         Critical.TextChanged += (_, _) => SaveAdvancedPreferences();
         Executable.TextChanged += (_, _) => SaveAdvancedPreferences();
         if (controller.PreferencesNotice.Length > 0) Validation.Text = controller.PreferencesNotice;
     }
     private void Cancel(object sender, RoutedEventArgs e) => controller.ShowUsagePage();
+    private void UpdateTransparencyLabels()
+    {
+        CircleTransparencyValue.Text = $"{CircleTransparency.Value:0}%";
+        EdgeTransparencyValue.Text = $"{EdgeTransparency.Value:0}%";
+        PanelTransparencyValue.Text = $"{PanelTransparency.Value:0}%";
+    }
     private void DragWindow(object sender, MouseButtonEventArgs e) { if (e.LeftButton == MouseButtonState.Pressed) Window.GetWindow(this)?.DragMove(); }
     private void Browse(object sender, RoutedEventArgs e)
     {
@@ -47,6 +59,9 @@ public partial class SettingsPage : UserControl
         settings.FloatingWidget = Floating.IsChecked == true;
         settings.AlertsEnabled = Alerts.IsChecked == true;
         settings.Theme = ((ComboBoxItem)ThemeChoice.SelectedItem).Content.ToString()!;
+        settings.CircleTransparency = (int)CircleTransparency.Value;
+        settings.EdgeTransparency = (int)EdgeTransparency.Value;
+        settings.PanelTransparency = (int)PanelTransparency.Value;
         return Persist(settings);
     }
     private bool SaveAdvancedPreferences()

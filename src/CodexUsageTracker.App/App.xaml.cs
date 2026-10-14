@@ -53,7 +53,7 @@ public partial class App : Application
     public static bool IsDarkTheme(string choice) => choice == "Dark" ||
         (choice == "System" && (int?)Registry.GetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "AppsUseLightTheme", 1) == 0);
 
-    public static void ApplyTheme(string choice)
+    public static void ApplyTheme(string choice, TrackerSettings? settings = null)
     {
         var dark = IsDarkTheme(choice);
         var palette = dark
@@ -66,6 +66,20 @@ public partial class App : Application
         Current.Resources["EdgeGlassBrush"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(dark ? "#40141E28" : "#40FFFFFF"));
         Current.Resources["EdgeFiveAccent"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(dark ? "#79C8B6" : "#34786A"));
         Current.Resources["EdgeWeekAccent"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(dark ? "#A8ACD8" : "#656995"));
+        settings ??= new TrackerSettings();
+        void BackgroundAlpha(string key, double opacity)
+        {
+            var color = ((SolidColorBrush)Current.Resources[key]).Color;
+            color.A = (byte)Math.Round(255 * Math.Clamp(opacity, 0, 1));
+            Current.Resources[key] = new SolidColorBrush(color);
+        }
+        var panelOpacity = 1 - settings.PanelTransparency / 100d;
+        BackgroundAlpha("GlassBrush", panelOpacity);
+        BackgroundAlpha("CardBrush", panelOpacity / 0.6 * 0.8);
+        BackgroundAlpha("EdgeGlassBrush", 1 - settings.EdgeTransparency / 100d);
+        var circleColor = ((SolidColorBrush)Current.Resources["GlassStrongBrush"]).Color;
+        circleColor.A = (byte)Math.Round(255 * (1 - settings.CircleTransparency / 100d));
+        Current.Resources["CircleGlassBrush"] = new SolidColorBrush(circleColor);
     }
 
     protected override void OnExit(ExitEventArgs e)

@@ -21,7 +21,7 @@ Use **Circle widget**, **Slim edge bar**, or both. Prefer a clear desktop? Leave
 
 **Fresh-install defaults:** taskbar status on; circle and edge bar off. Existing preferences are preserved. By default, displays appear only while Codex is running; the tray remains available.
 
-The edge bar is **28 DIPs thick** in either orientation, with upright numbers on the sides and a **75%-transparent background**. Windows scales it with your display settings. It overlays a small part of the desktop rather than reserving screen space.
+The edge bar is **28 DIPs thick** in either orientation, with upright numbers on the sides and an **adjustable background (75% transparent by default)**. Windows scales it with your display settings. It overlays a small part of the desktop rather than reserving screen space.
 
 > **Taskbar ≠ system tray.** The taskbar button is separate from the icon beside the clock. Windows controls taskbar grouping and title visibility. Choose **Pin to taskbar** yourself to keep its launcher after the app closes; the tracker does not change your taskbar settings.
 
@@ -59,7 +59,7 @@ The panel also shows a **pace estimate**, **seven days of local history**, and t
 - **Open and close:** click a display for details. Escape returns from Settings to usage, then hides the panel. Settings replaces the usage page within the same frame.
 - **Automatic startup:** the watcher checks for Codex every two seconds. Choosing **Quit** stops the tracker for that Codex session; after Codex fully exits and starts again, the watcher launches it again. Disable automatic launch in Settings to stop the watcher.
 - **Move the portable folder:** toggle automatic launch off before moving it, then on again from the new location.
-- **Appearance:** choose Light, Dark, or System. Display positions and preferences are remembered.
+- **Appearance:** choose Light, Dark, or System. Adjust background transparency separately for the circle, edge bar, and details panel (0% solid to 100% clear); changes preview live and save automatically. Display positions and preferences are remembered.
 
 ## See it in context
 

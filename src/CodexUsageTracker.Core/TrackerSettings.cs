@@ -17,6 +17,9 @@ public sealed class TrackerSettings
     public int WarningPercent { get; set; } = 25;
     public int CriticalPercent { get; set; } = 10;
     public string Theme { get; set; } = "System";
+    public int PanelTransparency { get; set; } = 40;
+    public int CircleTransparency { get; set; } = 10;
+    public int EdgeTransparency { get; set; } = 75;
     public string CodexExecutable { get; set; } = "";
     public double? Left { get; set; }
     public double? Top { get; set; }
@@ -33,6 +36,9 @@ public sealed class TrackerSettings
           {
             var settings = JsonSerializer.Deserialize<TrackerSettings>(File.ReadAllText(candidate)) ?? throw new JsonException("Empty preferences.");
             settings.WarningPercent = Math.Clamp(settings.WarningPercent, 1, 99);
+            settings.PanelTransparency = Math.Clamp(settings.PanelTransparency, 0, 100);
+            settings.CircleTransparency = Math.Clamp(settings.CircleTransparency, 0, 100);
+            settings.EdgeTransparency = Math.Clamp(settings.EdgeTransparency, 0, 100);
             settings.CriticalPercent = Math.Clamp(settings.CriticalPercent, 1, settings.WarningPercent);
             if (settings.Theme is not ("System" or "Light" or "Dark")) settings.Theme = "System";
             if (settings.Edge is not ("Top" or "Left" or "Right")) settings.Edge = "Top";

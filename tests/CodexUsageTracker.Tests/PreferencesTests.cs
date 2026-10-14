@@ -16,6 +16,8 @@ public sealed class PreferencesTests : IDisposable
     [Fact] public void EveryPreferenceSurvivesFreshLoad()
     {
         var expected = Saved();
+        expected.CircleTransparency = 100; expected.EdgeTransparency = 45; expected.PanelTransparency = 0;
+        expected.Save(SettingsPath);
         Assert.Equal(JsonSerializer.Serialize(expected), JsonSerializer.Serialize(TrackerSettings.Load(SettingsPath)));
     }
     [Fact] public void CorruptPrimaryRecoversLatestSavedPreferences()
