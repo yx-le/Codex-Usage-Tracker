@@ -297,6 +297,16 @@ public sealed class TrackerController : IDisposable
             }
             finally { Directory.Delete(blockedSave); }
             var page = (SettingsPage)details.SettingsHost.Content;
+            var sections = (TabControl)page.FindName("Sections");
+            for (var section = 0; section < sections.Items.Count; section++)
+            {
+                sections.SelectedIndex = section;
+                details.UpdateLayout(); RepositionPanel(); details.UpdateLayout();
+                Capture("settings-section-" + section, details);
+                if (((ScrollViewer)page.FindName("SettingsScroll")).ScrollableHeight > 1 && details.Height < 700)
+                    throw new InvalidOperationException("Settings section should fit without scrolling.");
+            }
+            sections.SelectedIndex = 1;
             var checkbox = (CheckBox)page.FindName("Floating");
             checkbox.IsChecked = !original.FloatingWidget;
             checkbox.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));

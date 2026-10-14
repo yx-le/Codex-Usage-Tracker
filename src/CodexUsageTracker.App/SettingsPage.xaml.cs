@@ -32,6 +32,12 @@ public partial class SettingsPage : UserControl
         Critical.TextChanged += (_, _) => SaveAdvancedPreferences();
         Executable.TextChanged += (_, _) => SaveAdvancedPreferences();
         if (controller.PreferencesNotice.Length > 0) Validation.Text = controller.PreferencesNotice;
+        Sections.SelectionChanged += (_, e) =>
+        {
+            if (e.Source != Sections) return;
+            SettingsScroll.ScrollToTop();
+            Dispatcher.BeginInvoke(() => controller.RepositionPanel());
+        };
     }
     private void Cancel(object sender, RoutedEventArgs e) => controller.ShowUsagePage();
     private void UpdateTransparencyLabels()

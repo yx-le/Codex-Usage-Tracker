@@ -45,7 +45,7 @@ public partial class DetailsWindow : Window
         var content = IsSettingsPage && SettingsHost.Content is SettingsPage settings
             ? (FrameworkElement)settings.FindName("SettingsContent") : UsageContent;
         content.Measure(new Size(Math.Max(1, width - 7), double.PositiveInfinity));
-        return Math.Max(790, Math.Ceiling(content.DesiredSize.Height) + (IsSettingsPage ? 134 : 98));
+        return Math.Max(IsSettingsPage ? 480 : 790, Math.Ceiling(content.DesiredSize.Height) + (IsSettingsPage ? 144 : 98));
     }
     public void SetHistory(IReadOnlyList<UsageSnapshot> samples) { Chart.Samples = samples; Chart.InvalidateVisual(); }
 }
