@@ -20,3 +20,9 @@ settings.json
 **/*.jks
 **/*.pfx
 **/pairing*.json
+
+# Local-only mobile companion; do not publish to this desktop repository.
+/android/
+/src/CodexUsageTracker.Bridge/
+/docs/MOBILE-PRODUCT-PLAN.md
+/.github/workflows/android.yml
