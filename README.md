@@ -53,6 +53,14 @@ Warning thresholds are configurable. At 0%, a red outline or track keeps the war
 
 The panel also shows a **pace estimate**, **seven days of local history**, and the **source and last-update time**. Pace is an estimate based on elapsed time and usage so far, not a prediction of future work.
 
+### A clearer usage history
+
+The history card gives **5-hour** and **weekly** quota their own charts. It opens on the **last 24 hours** so recent changes are easy to follow; choose **7d** for the full week. Hover over a recorded point for its exact remaining percentage and local time.
+
+<img src="docs/images/history-chart.png" width="420" alt="Example 24-hour quota history: a separate teal five-hour chart and lavender weekly chart, both labelled from zero to 100 percent remaining. Solid lines stop at resets and missing readings." />
+
+*Illustration uses synthetic readings.* Solid lines connect recorded values within the same quota window. Resets and gaps longer than 30 minutes leave breaks instead of drawing misleading connecting lines. A stronger backdrop keeps the charts readable over a busy desktop in light and dark themes.
+
 ## Everyday behavior
 
 - **Refresh:** readings update about every 60 seconds while Codex runs. A due reset triggers a fresh request, with retries if needed. Manual refresh is available in the panel and tray menu.
@@ -97,4 +105,4 @@ A background `codex.exe` counts as running, even if its window is closed. Window
 
 This is an independent utility, not an official OpenAI product.
 
-History uses straight line segments, date labels, and a latest-value marker. Dashed segments indicate missing readings; quota resets begin a new segment. Reset details show both a countdown and the exact local date/time with UTC offset. Saved history stays in the Windows user profile through portable updates, with a SQLite recovery backup; the retention window remains seven days.
+History uses separate charts with straight line segments, time/date labels, hover readings, and a latest-value marker. Missing readings leave gaps; quota resets begin a new segment. Choose 24h or 7d to change the visible period. Reset details show both a countdown and the exact local date/time with UTC offset. Saved history stays in the Windows user profile through portable updates, with a SQLite recovery backup; the retention window remains seven days.

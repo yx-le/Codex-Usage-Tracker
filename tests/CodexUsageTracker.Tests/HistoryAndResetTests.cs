@@ -6,6 +6,24 @@ namespace CodexUsageTracker.Tests;
 
 public sealed class HistoryAndResetTests
 {
+    [Fact] public void OfflineGapsStayBlankAndSmallResetClockDriftDoesNotFragmentLines()
+    {
+        var now = DateTimeOffset.UtcNow;
+        var reset = now.AddHours(2);
+        UsageSnapshot Sample(int minutes, int resetSeconds) => new(now.AddMinutes(minutes), "Codex app-server", new(20, 300, reset.AddSeconds(resetSeconds)), null);
+        var segments = HistorySeries.Build(new[] { Sample(-120, 0), Sample(-110, 30), Sample(-10, 30), Sample(-5, 60) }, s => s.FiveHour, now);
+        Assert.Equal(2, segments.Count);
+        Assert.All(segments, s => Assert.Equal(2, s.Count));
+    }
+    [Fact] public void DayViewExcludesEarlierDaysAndInvalidPercentages()
+    {
+        var now = DateTimeOffset.UtcNow;
+        UsageSnapshot Sample(int hours, double used) => new(now.AddHours(hours), "Codex app-server", new(used, 300, null), null);
+        var samples = new[] { Sample(-48, 10), Sample(-2, -1), Sample(-1, 25), Sample(0, 101) };
+        var day = HistorySeries.Build(samples, s => s.FiveHour, now, 1);
+        Assert.Equal(75, Assert.Single(Assert.Single(day)).Remaining);
+        Assert.Equal(2, HistorySeries.Build(samples, s => s.FiveHour, now, 7).Count);
+    }
     [Fact] public void LinesAreChronologicalDeduplicatedAndSplitAtReset()
     {
         var now = DateTimeOffset.UtcNow;

@@ -271,7 +271,13 @@ public sealed class TrackerController : IDisposable
         ViewModel.Snapshot = new(now, "Preview · synthetic data", new(27, 300, now.AddHours(3)), new(58, 10080, now.AddDays(3)));
         ViewModel.SourceDetail = "PREVIEW · synthetic quota for layout verification";
         ViewModel.Notify(); widget.Show(); ShowDetails();
-        details.SetHistory(Enumerable.Range(0, 80).Select(i => new UsageSnapshot(now.AddDays(-7).AddHours(i * 168d / 79), "Preview", new(10 + i % 20 * 3, 300, now.AddHours(3)), new(i * 58d / 79, 10080, now.AddDays(3)))).ToArray());
+        var previewHistory = Enumerable.Range(0, 2017).Where(i => i % 288 is < 100 or > 160).Select(i =>
+        {
+            var time = now.AddDays(-7).AddMinutes(i * 5);
+            return new UsageSnapshot(time, "Preview", new(i % 60 * 1.5, 300, time.AddMinutes((60 - i % 60) * 5)), new(8 + i * 50d / 2016, 10080, now.AddDays(3)));
+        }).ToArray();
+        ViewModel.Snapshot = previewHistory[^1] with { Source = "Preview · synthetic data" }; ViewModel.Notify();
+        details.SetHistory(previewHistory);
         Application.Current.Dispatcher.InvokeAsync(() =>
         {
             void Capture(string name, Window target)
@@ -283,6 +289,8 @@ public sealed class TrackerController : IDisposable
                 using var file = File.Create(Path.Combine(directory, name + ".png")); encoder.Save(file);
             }
             Capture("widget", widget); Capture("details", details);
+            details.Chart.Days = 7; details.Chart.InvalidateVisual(); Capture("details-week", details);
+            details.Chart.Days = 1; details.Chart.InvalidateVisual();
             var taskbarPreview = new System.Windows.Media.Imaging.PngBitmapEncoder();
             taskbarPreview.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(TaskbarStatusWindow.CreateQuotaIcon(ViewModel)));
             using (var iconFile = File.Create(Path.Combine(directory, "taskbar-status.png"))) taskbarPreview.Save(iconFile);

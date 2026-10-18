@@ -47,9 +47,19 @@
               <StackPanel Margin="0,11,0,0"><TextBlock Text="{Binding WeekReset}"/><TextBlock Text="{Binding WeekResetDate}" TextWrapping="Wrap" Margin="0,4,0,0" FontSize="11" Foreground="{DynamicResource MutedBrush}"/><TextBlock Text="{Binding WeekPace}" Margin="0,4,0,0" FontSize="11" Foreground="{DynamicResource MutedBrush}"/></StackPanel>
             </StackPanel>
           </Border>
-          <DockPanel><TextBlock Text="LAST 7 DAYS" FontSize="11" FontWeight="SemiBold"/><TextBlock Text="Remaining %" HorizontalAlignment="Right" Foreground="{DynamicResource MutedBrush}" FontSize="11"/></DockPanel>
-          <local:HistoryChart x:Name="Chart" ToolTip="Straight lines connect recorded values. Dashed lines mark gaps over 10 minutes; quota resets start a new line." Height="88" Margin="0,10,0,4"/>
-          <StackPanel Orientation="Horizontal"><TextBlock Text="● 5-hour" Foreground="{DynamicResource AccentBrush}" FontSize="10"/><TextBlock Text="● Weekly" Foreground="{DynamicResource WeekBrush}" FontSize="10" Margin="16,0,0,0"/></StackPanel>
+          <Border Background="{DynamicResource GlassStrongBrush}" CornerRadius="16" Padding="13,12">
+            <StackPanel>
+              <Grid Margin="0,0,0,12">
+                <TextBlock Text="HISTORY · REMAINING %" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                  <Button x:Name="DayRange" Content="24h" Padding="9,5" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" Click="ShowDayHistory" Background="{DynamicResource CardBrush}" AutomationProperties.Name="Show last 24 hours of quota history"/>
+                  <Button x:Name="WeekRange" Content="7d" Padding="9,5" Margin="4,0,0,0" FontSize="11" Click="ShowWeekHistory" Background="Transparent" AutomationProperties.Name="Show last seven days of quota history"/>
+                </StackPanel>
+              </Grid>
+              <local:HistoryChart x:Name="Chart" Height="213"/>
+              <TextBlock Text="Hover for readings · gaps and resets stay separate" FontSize="10" Foreground="{DynamicResource MutedBrush}" Margin="0,5,0,0"/>
+            </StackPanel>
+          </Border>
           <Border Background="{DynamicResource CardBrush}" CornerRadius="16" Margin="0,16,0,0" Padding="13,11">
             <StackPanel>
               <TextBlock Text="{Binding SourceDetail}" TextWrapping="Wrap" FontSize="11"/>
