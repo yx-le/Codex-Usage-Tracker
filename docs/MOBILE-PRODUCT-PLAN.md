@@ -1,6 +1,6 @@
 # AI Quota Monitor — mobile product plan
 
-Planning draft · 18 October 2026. This is a proposed companion product, not an implemented mobile app. Platform and connector capabilities must be revalidated during implementation.
+Planning draft · 18 October 2026. An initial [Android alpha](../android/README.md) now implements part of this plan: a native dashboard, secure manual-code pairing, Codex data from Windows, app shortcuts, and an optional notch overlay. The remaining roadmap is proposed; connector and hardware capabilities must still be validated.
 
 ## Product purpose
 

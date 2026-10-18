@@ -1,0 +1,38 @@
+name: Android companion alpha
+on:
+  push:
+    paths: ['android/**', 'src/CodexUsageTracker.Bridge/**', '.github/workflows/android.yml']
+  pull_request:
+    paths: ['android/**', 'src/CodexUsageTracker.Bridge/**', '.github/workflows/android.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+      - run: sdkmanager 'platforms;android-36.1' 'build-tools;36.0.0'
+      - run: chmod +x android/gradlew && cd android && ./gradlew :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug --console=plain
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AIQuota-Android-alpha
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+  bridge:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - run: dotnet publish src/CodexUsageTracker.Bridge/CodexUsageTracker.Bridge.csproj -c Release --self-contained true -r win-x64 -o artifacts/bridge
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AIQuotaBridge-Windows-x64
+          path: artifacts/bridge

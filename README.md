@@ -99,4 +99,4 @@ This is an independent utility, not an official OpenAI product.
 
 History uses straight line segments, date labels, and a latest-value marker. Dashed segments indicate missing readings; quota resets begin a new segment. Reset details show both a countdown and the exact local date/time with UTC offset. Saved history stays in the Windows user profile through portable updates, with a SQLite recovery backup; the retention window remains seven days.
 
-A proposed Android/iPhone companion is described in the [mobile product plan](docs/MOBILE-PRODUCT-PLAN.md). It is a planning document, not a shipped mobile feature.
+An initial [Android companion alpha](android/README.md) now provides local-network Codex monitoring, optional notch status, and ChatGPT/Claude/Gemini app switching. It targets Xiaomi 17 Pro testing using standard Android 14+ APIs. Claude/Gemini usage connectors and iPhone support remain planned; see the [mobile product plan](docs/MOBILE-PRODUCT-PLAN.md).

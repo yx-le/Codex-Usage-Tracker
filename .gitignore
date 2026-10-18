@@ -12,3 +12,11 @@ artifacts/
 settings.json
 .env
 *.log
+**/.gradle/
+**/.kotlin/
+**/build/
+**/local.properties
+**/*.keystore
+**/*.jks
+**/*.pfx
+**/pairing*.json
