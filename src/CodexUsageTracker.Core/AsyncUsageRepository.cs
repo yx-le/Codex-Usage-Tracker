@@ -11,7 +11,7 @@ public sealed class AsyncUsageRepository(string path)
         RunAsync(store => store.ReadHistory(DateTimeOffset.UtcNow), token);
 
     public Task<IReadOnlyList<UsageSnapshot>> SaveAndReadAsync(UsageSnapshot snapshot, CancellationToken token = default) =>
-        RunAsync(store => { store.Save(snapshot); store.Prune(DateTimeOffset.UtcNow); return store.ReadHistory(DateTimeOffset.UtcNow); }, token);
+        RunAsync(store => { store.Save(snapshot); return store.ReadHistory(DateTimeOffset.UtcNow); }, token);
 
     public Task<IReadOnlyList<UsageSnapshot>> ClearAsync(CancellationToken token = default) =>
         RunAsync(store => { store.Clear(); return store.ReadHistory(DateTimeOffset.UtcNow); }, token);

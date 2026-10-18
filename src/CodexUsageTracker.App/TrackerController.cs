@@ -81,7 +81,13 @@ public sealed class TrackerController : IDisposable
         UpdateTray();
     }
 
-    public void Start() { timer.Start(); _ = UpdateHistoryAsync(); OnTick(null, EventArgs.Empty); }
+    public async void Start()
+    {
+        // Restore persisted readings before the first fresh quota request.
+        await UpdateHistoryAsync();
+        if (disposed) return;
+        timer.Start(); OnTick(null, EventArgs.Empty);
+    }
     private async void OnTick(object? sender, EventArgs e)
     {
         if (disposed) return;

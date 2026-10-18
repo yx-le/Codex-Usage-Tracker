@@ -27,7 +27,7 @@ internal sealed class TaskbarStatusWindow : Window
         var view = controller.ViewModel;
         Icon = CreateQuotaIcon(view);
         Title = $"Codex · 5h {view.FiveRemaining} · Week {view.WeekRemaining}";
-        TaskbarItemInfo.Description = $"{Title}\n{view.FiveReset}\n{view.WeekReset}\n{view.Status}";
+        TaskbarItemInfo.Description = $"{Title}\n5h: {view.FiveReset} · {view.FiveResetDate}\nWeek: {view.WeekReset} · {view.WeekResetDate}\n{view.Status}";
         var state = view.OverallStatus;
         TaskbarItemInfo.ProgressState = state switch
         {

@@ -59,6 +59,8 @@ public sealed class TrackerViewModel : INotifyPropertyChanged
     public string WeekUsed => Valid(Snapshot.Weekly) ? $"{Snapshot.Weekly!.UsedPercent:0}% used" : "Quota unavailable";
     public string FiveReset => Snapshot.FiveHour?.Countdown(Now) ?? "Reset time unavailable";
     public string WeekReset => Snapshot.Weekly?.Countdown(Now) ?? "Reset time unavailable";
+    public string FiveResetDate => Snapshot.FiveHour?.ResetDateTime() ?? "Reset date unavailable";
+    public string WeekResetDate => Snapshot.Weekly?.ResetDateTime() ?? "Reset date unavailable";
     public string FivePace => Snapshot.IsStale(Now) ? "Pace unavailable · stale data" : PaceCalculator.Describe(Snapshot.FiveHour, Now);
     public string WeekPace => Snapshot.IsStale(Now) ? "Pace unavailable · stale data" : PaceCalculator.Describe(Snapshot.Weekly, Now);
     public string Status => !Snapshot.HasData ? "N/A" : Snapshot.Source.StartsWith("Preview", StringComparison.Ordinal) ? "DEMO" : Snapshot.IsStale(Now) ? "STALE" : Snapshot.FiveHour?.HasExpired(Now) == true || Snapshot.Weekly?.HasExpired(Now) == true ? "RESET DUE" : Snapshot.Source == "Codex app-server" ? "LIVE" : "LOCAL";

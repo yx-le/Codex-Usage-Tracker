@@ -13,6 +13,12 @@ public sealed record QuotaWindow(double UsedPercent, int DurationMinutes, DateTi
         return delta.TotalDays >= 1 ? $"Resets in {(int)delta.TotalDays}d {delta.Hours}h"
             : $"Resets in {(int)delta.TotalHours}h {delta.Minutes}m";
     }
+    public string ResetDateTime(TimeZoneInfo? zone = null)
+    {
+        if (ResetsAt is not { } reset) return "Reset date unavailable";
+        var local = TimeZoneInfo.ConvertTime(reset, zone ?? TimeZoneInfo.Local);
+        return local.ToString("ddd, d MMM yyyy · HH:mm 'UTC'zzz", System.Globalization.CultureInfo.CurrentCulture);
+    }
 }
 
 public sealed record UsageSnapshot(DateTimeOffset ObservedAt, string Source, QuotaWindow? FiveHour, QuotaWindow? Weekly)

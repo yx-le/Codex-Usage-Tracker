@@ -89,10 +89,14 @@ Quota readings and preferences stay in `%LOCALAPPDATA%\CodexUsageTracker`. Histo
 
 ## Development and limitations
 
-The app has **79 automated tests** and has been built and checked on Windows 11 x64. Windows 10 is targeted but has not been tested on a separate machine. Multi-monitor placement has automated layout coverage; physical multi-monitor testing remains limited.
+The app has **83 automated tests** and has been built and checked on Windows 11 x64. Windows 10 is targeted but has not been tested on a separate machine. Multi-monitor placement has automated layout coverage; physical multi-monitor testing remains limited.
 
 A background `codex.exe` counts as running, even if its window is closed. Windows may suppress notification balloons. History follows the local Windows profile, so clear it when switching Codex accounts if you want separate charts. There is no automatic updater or taskbar injection.
 
 [Build, test, and preview](docs/DEVELOPMENT.md) · [Architecture](docs/ARCHITECTURE.md) · [Rebuild README illustrations](docs/render-readme.ps1)
 
 This is an independent utility, not an official OpenAI product.
+
+History uses straight line segments, date labels, and a latest-value marker. Dashed segments indicate missing readings; quota resets begin a new segment. Reset details show both a countdown and the exact local date/time with UTC offset. Saved history stays in the Windows user profile through portable updates, with a SQLite recovery backup; the retention window remains seven days.
+
+A proposed Android/iPhone companion is described in the [mobile product plan](docs/MOBILE-PRODUCT-PLAN.md). It is a planning document, not a shipped mobile feature.

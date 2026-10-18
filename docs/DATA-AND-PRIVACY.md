@@ -19,7 +19,9 @@ Local files live in `%LOCALAPPDATA%\CodexUsageTracker`:
 | File | Contents |
 | --- | --- |
 | `settings.json` + `.bak` recovery copy | UI preferences, thresholds, widget location, optional Codex executable path |
-| `usage.db` (+ SQLite WAL files) | Observation time, source label, used percentages, reset timestamps |
+| `usage.db` (+ SQLite WAL files and `.bak` recovery copy) | Observation time, source label, used percentages, reset timestamps |
+
+History lives outside the portable application folder and loads before the first fresh quota request. SQLite's online backup API creates a recovery copy including committed WAL pages. A missing primary database can recover from this copy; an existing database is never replaced automatically. Clear local history also removes old recovery data. Updating the EXE must preserve this user data folder. The update was verified by comparing retained readings before and after installing and restarting the application. Earlier losses were not reproduced, and the app cannot reconstruct records no longer present in a database or backup.
 
 No identity, prompt text, response text, tokens, cookies, or keys are stored by the tracker. Seven-day retention is applied at startup and refresh; if the app is closed, expired records are removed the next time it runs. **Clear local history** removes all readings. The database uses the normal Windows user profile permissions; it is not separately encrypted. History follows this local profile, so clear it when switching Codex accounts if you want separate charts.
 
