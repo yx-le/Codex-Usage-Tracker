@@ -5,6 +5,41 @@ namespace CodexUsageTracker.Tests;
 
 public class EdgeBarTests
 {
+    [Theory]
+    [InlineData("Left", 28, 132)]
+    [InlineData("Right", 28, 132)]
+    [InlineData("Top", 132, 28)]
+    public void DetailsAreCenteredBesideOrBelowBar(string edge, double barWidth, double barHeight)
+    {
+        var work = new LayoutRect(-1920, 100, 1920, 980);
+        var bar = EdgeBarPlacement.Place(work, edge, 0.5, barWidth, barHeight);
+        var panel = PanelPlacement.FromEdgeBar(work, bar, edge, 360, 530);
+        if (edge == "Top")
+        {
+            Assert.Equal(bar.Bottom + 12, panel.Top);
+            Assert.Equal(bar.Left + bar.Width / 2, panel.Left + panel.Width / 2);
+        }
+        else
+        {
+            Assert.Equal(bar.Top + bar.Height / 2, panel.Top + panel.Height / 2);
+            if (edge == "Left") Assert.Equal(bar.Right + 12, panel.Left);
+            else Assert.Equal(bar.Left - 12, panel.Right);
+        }
+    }
+    [Theory]
+    [InlineData("Left", 0)] [InlineData("Left", 1)]
+    [InlineData("Right", 0)] [InlineData("Right", 1)]
+    [InlineData("Top", 0)] [InlineData("Top", 1)]
+    public void EdgePopupClampsAtMonitorCornersWithoutCoveringBar(string edge, double offset)
+    {
+        var work = new LayoutRect(-1280, -200, 1280, 720);
+        var bar = EdgeBarPlacement.Place(work, edge, offset, edge == "Top" ? 132 : 28, edge == "Top" ? 28 : 132);
+        var panel = PanelPlacement.FromEdgeBar(work, bar, edge, 420, 900);
+        Assert.True(panel.Left >= work.Left && panel.Right <= work.Right && panel.Top >= work.Top && panel.Bottom <= work.Bottom);
+        if (edge == "Top") Assert.Equal(bar.Bottom + 12, panel.Top);
+        else if (edge == "Left") Assert.Equal(bar.Right + 12, panel.Left);
+        else Assert.Equal(bar.Left - 12, panel.Right);
+    }
     [Fact] public void DesktopDisplaysHaveEqualOptInDefaults()
     {
         var settings = new TrackerSettings();

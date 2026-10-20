@@ -209,7 +209,10 @@ public sealed class TrackerController : IDisposable
         var anchor = new LayoutRect(anchorWindow.Left, anchorWindow.Top, anchorWindow.Width, anchorWindow.Height);
         if (!anchorWindow.IsVisible) anchor = new LayoutRect(work.Right - 96, work.Bottom - 96, 96, 96);
         var panelWidth = details.IsSettingsPage ? 420 : 360;
-        var placement = PanelPlacement.Beside(work, anchor, panelWidth, details.PreferredHeight(Math.Min(panelWidth, work.Width)));
+        var panelHeight = details.PreferredHeight(Math.Min(panelWidth, work.Width));
+        var placement = anchorWindow == edgeBar
+            ? PanelPlacement.FromEdgeBar(work, anchor, Settings.Edge, panelWidth, panelHeight)
+            : PanelPlacement.Beside(work, anchor, panelWidth, panelHeight);
         details.Width = placement.Width; details.Height = placement.Height;
         details.Left = placement.Left; details.Top = placement.Top;
     }

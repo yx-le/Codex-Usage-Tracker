@@ -23,6 +23,8 @@ Use **Circle widget**, **Slim edge bar**, or both. Prefer a clear desktop? Leave
 
 The edge bar is **28 DIPs thick** in either orientation, with upright numbers on the sides and an **adjustable background (75% transparent by default)**. Windows scales it with your display settings. It overlays a small part of the desktop rather than reserving screen space.
 
+Click a side-mounted bar to open details beside it, vertically centered on the bar. A top-mounted bar opens details centered below it. The panel stays within that monitor's work area and leaves the bar visible.
+
 > **Taskbar ≠ system tray.** The taskbar button is separate from the icon beside the clock. Windows controls taskbar grouping and title visibility. Choose **Pin to taskbar** yourself to keep its launcher after the app closes; the tracker does not change your taskbar settings.
 
 ## Get started
@@ -90,7 +92,7 @@ Only preferences are saved in `%LOCALAPPDATA%\CodexUsageTracker`. Quota readings
 
 ## Development and limitations
 
-The app has **77 automated tests** and has been built and checked on Windows 11 x64. Windows 10 is targeted but has not been tested on a separate machine. Multi-monitor placement has automated layout coverage; physical multi-monitor testing remains limited.
+The app has **86 automated tests** and has been built and checked on Windows 11 x64. Windows 10 is targeted but has not been tested on a separate machine. Multi-monitor placement has automated layout coverage; physical multi-monitor testing remains limited.
 
 A background `codex.exe` counts as running, even if its window is closed. Windows may suppress notification balloons. There is no automatic updater or taskbar injection.
 
