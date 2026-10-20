@@ -63,10 +63,6 @@
                 <CheckBox x:Name="EdgeEnabled" Content="Slim edge bar" Margin="0,0,0,0"/>
                 <TextBlock Text="A quiet strip with both quotas. Drag to the top or sides; click for details." Style="{StaticResource Caption}"/>
               </StackPanel></Border>
-              <Border Style="{StaticResource Card}"><StackPanel>
-                <CheckBox x:Name="TaskbarEnabled" Content="Windows taskbar" Margin="0,0,0,0"/>
-                <TextBlock Text="Quota progress in a taskbar button. Click for details." Style="{StaticResource Caption}"/>
-              </StackPanel></Border>
               <TextBlock Text="Launch and visibility" Style="{StaticResource SectionTitle}"/>
               <Border Style="{StaticResource Card}" Margin="0,8,0,0"><StackPanel>
                 <CheckBox x:Name="Startup" Content="Automatically launch with Codex" Click="ChangeStartup" Margin="0,0,0,0"/>

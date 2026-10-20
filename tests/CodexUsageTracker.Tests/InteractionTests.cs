@@ -6,6 +6,25 @@ namespace CodexUsageTracker.Tests;
 public class InteractionTests
 {
     [Theory]
+    [InlineData(100)] [InlineData(1700)]
+    public void CirclePopupIsVerticallyCenteredWhenThereIsRoom(double x)
+    {
+        var work = new LayoutRect(0, 0, 1920, 1040);
+        var widget = new LayoutRect(x, 450, 96, 96);
+        var panel = PanelPlacement.Beside(work, widget, 360, 530);
+        Assert.Equal(widget.Top + widget.Height / 2, panel.Top + panel.Height / 2);
+        AssertInsideAndSeparate(work, widget, panel);
+    }
+    [Fact] public void CirclePopupCentersBelowWhenNeitherSideHasRoom()
+    {
+        var work = new LayoutRect(0, 0, 500, 1000);
+        var widget = new LayoutRect(202, 80, 96, 96);
+        var panel = PanelPlacement.Beside(work, widget, 360, 530);
+        Assert.Equal(widget.Bottom + 12, panel.Top);
+        Assert.Equal(widget.Left + widget.Width / 2, panel.Left + panel.Width / 2);
+        AssertInsideAndSeparate(work, widget, panel);
+    }
+    [Theory]
     [InlineData(0, QuotaStatus.Exhausted)] [InlineData(10, QuotaStatus.Critical)]
     [InlineData(11, QuotaStatus.Warning)] [InlineData(25, QuotaStatus.Warning)] [InlineData(26, QuotaStatus.Healthy)]
     public void QuotaColorsFollowRemainingQuota(double remaining, QuotaStatus expected)

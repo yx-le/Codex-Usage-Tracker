@@ -6,32 +6,31 @@ Windows 10/11 x64 · C# / .NET 8 / WPF · No history recording · No API key
 
 [Get started](#get-started) · [Choose your display](#choose-your-display) · [Read the numbers](#read-the-numbers) · [Privacy](#privacy) · [Build from source](docs/DEVELOPMENT.md)
 
-<img src="docs/images/display-guide.png" width="1280" alt="Three display choices: a movable circle, a slim bar that adapts to the top or sides, and a separate Windows taskbar button. Circle and edge bar can be enabled independently." />
+<img src="docs/images/display-guide.png" width="1280" alt="Two optional desktop displays: a movable circle and a slim bar that adapts to the top or sides. The system tray remains available." />
 
 ## Choose your display
 
-Use **Circle widget**, **Slim edge bar**, or both. Prefer a clear desktop? Leave both off and use the taskbar. The two desktop displays have equal controls in **Settings** and the tray menu.
+Use **Circle widget**, **Slim edge bar**, or both. Prefer a clear desktop? Leave both off and use the system tray. The two desktop displays have equal controls in **Settings** and the tray menu.
 
 | Display | What you see | How you use it |
 | --- | --- | --- |
 | **Circle widget** | Five-hour percentage, with an outer five-hour ring and inner weekly ring | Drag to move; click for details |
 | **Slim edge bar** | Both remaining percentages, with teal and lavender bars | Drag near the top, left, or right edge; release to snap and adapt |
-| **Windows taskbar** | A native button with two compact quota bars; warning highlights when low | Hover for both quotas; click for details; right-click to pin |
 | **System tray** | A circular status icon and quick-action menu | Open details, refresh, change displays, or quit |
 
-**Fresh-install defaults:** taskbar status on; circle and edge bar off. Existing preferences are preserved. By default, displays appear only while Codex is running; the tray remains available.
+**Fresh-install defaults:** circle and edge bar off; the system tray is always available. Existing preferences are preserved. By default, displays appear only while Codex is running; the tray remains available.
 
 The edge bar is **28 DIPs thick** in either orientation, with upright numbers on the sides and an **adjustable background (75% transparent by default)**. Windows scales it with your display settings. It overlays a small part of the desktop rather than reserving screen space.
 
-Click a side-mounted bar to open details beside it, vertically centered on the bar. A top-mounted bar opens details centered below it. The panel stays within that monitor's work area and leaves the bar visible.
+Click a side-mounted bar to open details beside it, vertically centered on the bar. A top-mounted bar opens details centered below it. The panel stays within that monitor's work area and leaves the bar visible. Clicking the circle widget also opens details centered beside it, with a centered above/below fallback if neither side has room.
 
-> **Taskbar ≠ system tray.** The taskbar button is separate from the icon beside the clock. Windows controls taskbar grouping and title visibility. Choose **Pin to taskbar** yourself to keep its launcher after the app closes; the tracker does not change your taskbar settings.
+The tracker has no separate taskbar button. Use the circular system tray icon beside the clock to open quota details or settings at any time.
 
 ## Get started
 
 1. **Get a portable build.** Open [Windows build in GitHub Actions](https://github.com/yx-le/Codex-Usage-Tracker/actions/workflows/build.yml), choose a successful run, and download its **CodexUsageTracker-win-x64** artifact. GitHub may require sign-in. Alternatively, [build from source](docs/DEVELOPMENT.md).
 2. **Extract the whole ZIP** to a permanent folder, then open **CodexUsageTracker.exe**. Keep its companion files together. The package includes the .NET runtime; no administrator access is needed.
-3. **Open Codex and sign in normally.** Click the tracker’s taskbar button or tray icon, then open **Settings** to choose your displays.
+3. **Open Codex and sign in normally.** Click the tracker’s tray icon, then open **Settings** to choose your displays.
 4. **Optional: enable “Automatically launch with Codex.”** A quiet watcher starts at Windows sign-in and launches the tracker when Codex opens. Preferences save automatically; **Done** closes Settings. Invalid values show an error instead of replacing saved preferences.
 
 If the tray icon is hidden, open Windows’ overflow menu beside the clock. If the tracker cannot find Codex, select the existing **codex.exe** in Settings.
@@ -80,7 +79,7 @@ The compact panel shows only what you need: **5-hour and weekly quota remaining*
 
 </details>
 
-Illustrations use actual app renders with synthetic values. Desktop scenes and taskbar arrangements are illustrative; close-ups may be enlarged. No private windows or account data are shown.
+Illustrations use actual app renders with synthetic values. Desktop scenes and tray arrangements are illustrative; close-ups may be enlarged. No private windows or account data are shown.
 
 ## Privacy
 
@@ -92,7 +91,7 @@ Only preferences are saved in `%LOCALAPPDATA%\CodexUsageTracker`. Quota readings
 
 ## Development and limitations
 
-The app has **86 automated tests** and has been built and checked on Windows 11 x64. Windows 10 is targeted but has not been tested on a separate machine. Multi-monitor placement has automated layout coverage; physical multi-monitor testing remains limited.
+The app has **90 automated tests** and has been built and checked on Windows 11 x64. Windows 10 is targeted but has not been tested on a separate machine. Multi-monitor placement has automated layout coverage; physical multi-monitor testing remains limited.
 
 A background `codex.exe` counts as running, even if its window is closed. Windows may suppress notification balloons. There is no automatic updater or taskbar injection.
 

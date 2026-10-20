@@ -15,7 +15,6 @@ public partial class SettingsPage : UserControl
         Alerts.IsChecked = settings.AlertsEnabled; Warning.Text = settings.WarningPercent.ToString(); Critical.Text = settings.CriticalPercent.ToString();
         ThemeChoice.SelectedIndex = settings.Theme == "Light" ? 1 : settings.Theme == "Dark" ? 2 : 0;
         Executable.Text = settings.CodexExecutable;
-        TaskbarEnabled.IsChecked = settings.TaskbarStatus;
         EdgeEnabled.IsChecked = settings.EdgeBar;
         CircleTransparency.Value = settings.CircleTransparency;
         EdgeTransparency.Value = settings.EdgeTransparency;
@@ -23,7 +22,7 @@ public partial class SettingsPage : UserControl
         UpdateTransparencyLabels();
         // Subscribe after initialization: populating controls must never overwrite
         // the preferences loaded from disk with XAML defaults.
-        foreach (var checkbox in new[] { OnlyRunning, Floating, TaskbarEnabled, EdgeEnabled, Alerts })
+        foreach (var checkbox in new[] { OnlyRunning, Floating, EdgeEnabled, Alerts })
             checkbox.Click += (_, _) => SaveDisplayPreferences();
         ThemeChoice.SelectionChanged += (_, _) => SaveDisplayPreferences();
         foreach (var slider in new[] { CircleTransparency, EdgeTransparency, PanelTransparency })
@@ -59,7 +58,6 @@ public partial class SettingsPage : UserControl
     private bool SaveDisplayPreferences()
     {
         var settings = controller.Settings.Copy();
-        settings.TaskbarStatus = TaskbarEnabled.IsChecked == true;
         settings.EdgeBar = EdgeEnabled.IsChecked == true;
         settings.OnlyWhileCodexRunning = OnlyRunning.IsChecked == true;
         settings.FloatingWidget = Floating.IsChecked == true;

@@ -44,16 +44,16 @@ Text 'Upright numbers at the sides' 560 366 16
 Text 'Only 28 DIPs wide' 560 396 16 '#79C8B6'
 Text '75% transparent background' 474 470 17
 Text 'Drag to an edge. It adapts.' 474 523 17 '#9FB2C4'
-Text 'Windows taskbar' 882 169 24 '#F5F8FB' $true
-Text 'Keep the desktop clear' 882 209 17
+Text 'System tray' 882 169 24 '#F5F8FB' $true
+Text 'Always within reach' 882 209 17
 Box 904 276 286 90 '#263746'
-Picture 'taskbar-status.png' 930 292 56 56
-Text '5h + weekly' 1004 305 20 '#F5F8FB'
-Text 'Two bars in one native button' 882 436 18
-Text 'Hover for quotas; click for details' 882 470 17
-Text 'Right-click the button to pin it.' 882 523 17 '#9FB2C4'
+Text '●' 930 290 35 '#79C8B6'
+Text 'Quota status' 990 310 18 '#F5F8FB'
+Text 'Click to open quota details' 882 436 18
+Text 'Right-click for quick actions' 882 470 17
+Text 'No separate taskbar button.' 882 523 17 '#9FB2C4'
 Text 'Circle + edge bar: choose either, both, or neither.' 44 615 23 '#F5F8FB' $true
-Text 'Actual app renders with synthetic values. Close-ups are enlarged; taskbar arrangement is illustrative.' 44 669 15 '#94A8BB'
+Text 'Widget and bar use actual app renders. Tray placement is illustrative.' 44 669 15 '#94A8BB'
 EndImage 'display-guide.png'
 
 BeginImage 960

@@ -10,7 +10,7 @@ public sealed class PreferencesTests : IDisposable
     private string SettingsPath => Path.Combine(directory, "settings.json");
     private TrackerSettings Saved()
     {
-        var settings = new TrackerSettings { OnlyWhileCodexRunning = false, FloatingWidget = true, TaskbarStatus = false, EdgeBar = true, Edge = "Right", EdgeOffset = 0.72, EdgeMonitor = @"\\.\DISPLAY1", AlertsEnabled = false, WarningPercent = 40, CriticalPercent = 15, Theme = "Light", Left = -124, Top = 611.2 };
+        var settings = new TrackerSettings { OnlyWhileCodexRunning = false, FloatingWidget = true, EdgeBar = true, Edge = "Right", EdgeOffset = 0.72, EdgeMonitor = @"\\.\DISPLAY1", AlertsEnabled = false, WarningPercent = 40, CriticalPercent = 15, Theme = "Light", Left = -124, Top = 611.2 };
         settings.Save(SettingsPath); return settings;
     }
     [Fact] public void EveryPreferenceSurvivesFreshLoad()
@@ -19,6 +19,15 @@ public sealed class PreferencesTests : IDisposable
         expected.CircleTransparency = 100; expected.EdgeTransparency = 45; expected.PanelTransparency = 0;
         expected.Save(SettingsPath);
         Assert.Equal(JsonSerializer.Serialize(expected), JsonSerializer.Serialize(TrackerSettings.Load(SettingsPath)));
+    }
+    [Fact] public void RemovedTaskbarPreferenceDoesNotResetExistingDisplayChoices()
+    {
+        Directory.CreateDirectory(directory);
+        File.WriteAllText(SettingsPath, """{"TaskbarStatus":true,"FloatingWidget":false,"EdgeBar":true,"Theme":"Light"}""");
+        var settings = TrackerSettings.Load(SettingsPath, out var notice);
+        Assert.Empty(notice); Assert.False(settings.FloatingWidget); Assert.True(settings.EdgeBar); Assert.Equal("Light", settings.Theme);
+        settings.Save(SettingsPath);
+        Assert.DoesNotContain("TaskbarStatus", File.ReadAllText(SettingsPath));
     }
     [Fact] public void CorruptPrimaryRecoversLatestSavedPreferences()
     {

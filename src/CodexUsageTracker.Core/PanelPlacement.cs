@@ -35,10 +35,10 @@ public static class PanelPlacement
         var rightSpace = Math.Max(0, work.Right - widget.Right - gap);
         var aboveSpace = Math.Max(0, widget.Top - work.Top - gap);
         var belowSpace = Math.Max(0, work.Bottom - widget.Bottom - gap);
-        var top = Math.Clamp(widget.Bottom - height, work.Top, work.Bottom - height);
+        var top = Math.Clamp(widget.Top + (widget.Height - height) / 2, work.Top, work.Bottom - height);
         if (leftSpace >= width) return new(widget.Left - gap - width, top, width, height);
         if (rightSpace >= width) return new(widget.Right + gap, top, width, height);
-        var left = Math.Clamp(widget.Left, work.Left, work.Right - width);
+        var left = Math.Clamp(widget.Left + (widget.Width - width) / 2, work.Left, work.Right - width);
         if (aboveSpace >= height) return new(left, widget.Top - gap - height, width, height);
         if (belowSpace >= height) return new(left, widget.Bottom + gap, width, height);
         // On compact displays prefer a shorter scrolling panel over covering the widget.

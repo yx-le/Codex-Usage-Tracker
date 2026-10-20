@@ -43,7 +43,7 @@ public class EdgeBarTests
     [Fact] public void DesktopDisplaysHaveEqualOptInDefaults()
     {
         var settings = new TrackerSettings();
-        Assert.False(settings.FloatingWidget); Assert.False(settings.EdgeBar); Assert.True(settings.TaskbarStatus);
+        Assert.False(settings.FloatingWidget); Assert.False(settings.EdgeBar);
     }
     [Theory]
     [InlineData(500, 10, "Top")]

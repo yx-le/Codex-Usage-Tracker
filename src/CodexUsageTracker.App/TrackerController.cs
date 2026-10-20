@@ -23,7 +23,6 @@ public sealed class TrackerController : IDisposable
     private readonly DispatcherTimer timer;
     private readonly WidgetWindow widget;
     private readonly EdgeBarWindow edgeBar;
-    private readonly TaskbarStatusWindow taskbar;
     private bool edgeAnchor;
     private readonly DetailsWindow details;
     private DateTimeOffset lastAttempt = DateTimeOffset.MinValue;
@@ -39,7 +38,7 @@ public sealed class TrackerController : IDisposable
         settingsPath = Path.Combine(dataDirectory, "settings.json");
         Settings = TrackerSettings.Load(settingsPath, out var preferencesNotice); PreferencesNotice = preferencesNotice; App.ApplyTheme(Settings.Theme, Settings);
         ViewModel.Settings = Settings;
-        widget = new WidgetWindow(this); details = new DetailsWindow(this); edgeBar = new EdgeBarWindow(this); taskbar = new TaskbarStatusWindow(this);
+        widget = new WidgetWindow(this); details = new DetailsWindow(this); edgeBar = new EdgeBarWindow(this);
         tray = new Forms.NotifyIcon { Text = "Codex Usage Tracker", Visible = true, Icon = Drawing.SystemIcons.Information };
         var menu = new RoundedTrayMenu
         {
@@ -94,7 +93,6 @@ public sealed class TrackerController : IDisposable
         if (Settings.EdgeBar && (!Settings.OnlyWhileCodexRunning || running))
         { if (!edgeBar.IsVisible) { edgeBar.Place(); edgeBar.Show(); edgeBar.Place(); } }
         else edgeBar.Hide();
-        if (Settings.TaskbarStatus && (!Settings.OnlyWhileCodexRunning || running)) { if (!taskbar.IsVisible) taskbar.Show(); } else taskbar.Hide();
         if (Settings.OnlyWhileCodexRunning && !running && lastRunning) details.Hide();
         var justStarted = running && !lastRunning; lastRunning = running;
         ViewModel.Notify();
@@ -178,7 +176,6 @@ public sealed class TrackerController : IDisposable
         using (var borrowed = Drawing.Icon.FromHandle(handle)) next = (Drawing.Icon)borrowed.Clone();
         DestroyIcon(handle);
         tray.Icon = next; ownedIcon?.Dispose(); ownedIcon = next;
-        taskbar.UpdateStatus(System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(next.Handle, Int32Rect.Empty, System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions()));
     }
     private void UpdateTrayMenu()
     {
@@ -258,9 +255,6 @@ public sealed class TrackerController : IDisposable
                 using var file = File.Create(Path.Combine(directory, name + ".png")); encoder.Save(file);
             }
             Capture("widget", widget); Capture("details", details);
-            var taskbarPreview = new System.Windows.Media.Imaging.PngBitmapEncoder();
-            taskbarPreview.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(TaskbarStatusWindow.CreateQuotaIcon(ViewModel)));
-            using (var iconFile = File.Create(Path.Combine(directory, "taskbar-status.png"))) taskbarPreview.Save(iconFile);
             PreviewScene.Save(Path.Combine(directory, "widget-context.png"), widget, false);
             PreviewScene.Save(Path.Combine(directory, "details-context.png"), details, true);
             foreach (var edge in new[] { "Top", "Left", "Right" }) { Settings.Edge = edge; edgeBar.Place(); edgeBar.Show(); edgeBar.Place(); Capture("edge-" + edge, edgeBar); }
