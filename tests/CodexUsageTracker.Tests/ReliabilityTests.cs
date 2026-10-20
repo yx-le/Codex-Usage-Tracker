@@ -1,5 +1,4 @@
 using CodexUsageTracker.Core;
-using Microsoft.Data.Sqlite;
 using Xunit;
 
 namespace CodexUsageTracker.Tests;
@@ -52,29 +51,4 @@ public sealed class ReliabilityTests
         Assert.Equal(widget, WidgetPlacement.InsideNearestWorkArea(widget, [new(-1600, -200, 1600, 1100), new(0, 0, 1920, 1040)]));
     }
 
-    [Fact] public async Task LockedDatabaseDoesNotBlockCallerAndQueuedClearWins()
-    {
-        var directory = Path.Combine(Path.GetTempPath(), "CodexUsageTracker.Tests", Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(directory);
-        try
-        {
-            var path = Path.Combine(directory, "usage.db"); var store = new AsyncUsageRepository(path);
-            await store.ReadAsync();
-            using var connection = new SqliteConnection($"Data Source={path}"); connection.Open();
-            using var command = connection.CreateCommand(); command.CommandText = "BEGIN IMMEDIATE"; command.ExecuteNonQuery();
-            var now = DateTimeOffset.UtcNow;
-            var save = store.SaveAndReadAsync(new(now, "Live", new(20, 300, now.AddHours(2)), null));
-            await Task.Delay(100);
-            Assert.False(save.IsCompleted); // The caller continued while SQLite waited on a lock.
-            using var canceled = new CancellationTokenSource();
-            var read = store.ReadAsync(canceled.Token); canceled.Cancel();
-            await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await read);
-            var clear = store.ClearAsync();
-            command.CommandText = "ROLLBACK"; command.ExecuteNonQuery();
-            Assert.Single(await save.WaitAsync(TimeSpan.FromSeconds(10)));
-            Assert.Empty(await clear.WaitAsync(TimeSpan.FromSeconds(10)));
-            Assert.Empty(await store.ReadAsync());
-        }
-        finally { SqliteConnection.ClearAllPools(); Directory.Delete(directory, true); }
-    }
 }

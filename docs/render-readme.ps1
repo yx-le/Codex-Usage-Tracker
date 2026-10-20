@@ -59,16 +59,16 @@ EndImage 'display-guide.png'
 BeginImage 960
 Text 'Read the detail panel in seconds.' 42 30 34 '#F5F8FB' $true
 Text '73% remaining means 27% has been used.' 44 82 21 '#79C8B6'
-Picture 'details-closeup.png' 816 126 420 790
+Picture 'details-closeup.png' 816 126 360 530
 Text '01   Check both limits' 48 166 25 '#F5F8FB' $true
 Text "5-hour and weekly limits are separate.`nThe percentage and filled bar show what remains." 48 209 20
 Text '02   Know when to return' 48 337 25 '#F5F8FB' $true
 Text "Each limit has its own reset countdown.`nA reset triggers a fresh reading, not an assumed refill." 48 380 20
-Text '03   Understand your pace' 48 508 25 '#F5F8FB' $true
-Text "On track / Above sustainable pace compares your`nusage so far with the time elapsed in the window." 48 551 20
+Text '03   Keep it simple' 48 508 25 '#F5F8FB' $true
+Text "Only quota remaining and reset times.`nNo charts or history recording." 48 551 20
 Text '04   Check the evidence' 48 679 25 '#F5F8FB' $true
-Text "Seven days of local history show the trend.`nThe source and last reading show how current it is." 48 722 20
+Text "The last reading shows how current it is.`nHover over the status for its source." 48 722 20
 Text 'Teal = 5-hour     Lavender = weekly' 48 832 21 '#B9C7DF'
 Text 'Amber / red signal low quota. Dashed widget rings mean stale data.' 48 875 16 '#94A8BB'
-Text 'Actual app rendering. Synthetic quota and history.' 48 918 15 '#94A8BB'
+Text 'Actual app rendering. Synthetic quota.' 48 918 15 '#94A8BB'
 EndImage 'reading-guide.png'

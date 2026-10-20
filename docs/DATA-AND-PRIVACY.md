@@ -12,18 +12,10 @@ The multi-bucket response's `codex` entry takes precedence. Other model-specific
 
 Quota refresh runs every 60 seconds while Codex runs; the countdown updates every second. A known reset triggers an immediate refresh, with a 15-second retry followed by 60-second retries if the source still reports the expired window. Pending resets survive unavailable or partial readings until a later reset is reported for that quota window; abandoned retries expire after eight days. Reads never overlap and an expired reading never implies a refill. Manual refresh works from the tray or panel. Data older than three minutes is STALE. Local fallback is always labelled cached/local. Low-quota alerts only use fresh app-server readings and are deduplicated per threshold and reset window during the running session. Restarting the tracker can repeat a still-applicable warning. Windows notification settings may suppress tray balloons.
 
-The pace estimate extrapolates the window-average usage rate. “Above sustainable pace” means projected consumption exceeds 105% of the quota by reset, allowing a small tolerance. It is unavailable for stale, expired, or unknown-reset data and says “Learning pace” during the first five minutes. It is advisory; it cannot predict future work.
+## Local storage
 
-Local files live in `%LOCALAPPDATA%\CodexUsageTracker`:
+Only preferences are saved in `%LOCALAPPDATA%\CodexUsageTracker\settings.json`. Current quota readings live in memory and are replaced by each refresh. The tracker does not record history, create a quota database, or retain readings after exit. No identity, prompt text, response text, tokens, cookies, or keys are stored.
 
-| File | Contents |
-| --- | --- |
-| `settings.json` + `.bak` recovery copy | UI preferences, thresholds, widget location, optional Codex executable path |
-| `usage.db` (+ SQLite WAL files and `.bak` recovery copy) | Observation time, source label, used percentages, reset timestamps |
-
-History lives outside the portable application folder and loads before the first fresh quota request. SQLite's online backup API creates a recovery copy including committed WAL pages. A missing primary database can recover from this copy; an existing database is never replaced automatically. Clear local history also removes old recovery data. Updating the EXE must preserve this user data folder. The update was verified by comparing retained readings before and after installing and restarting the application. Earlier losses were not reproduced, and the app cannot reconstruct records no longer present in a database or backup.
-
-No identity, prompt text, response text, tokens, cookies, or keys are stored by the tracker. Seven-day retention is applied at startup and refresh; if the app is closed, expired records are removed the next time it runs. **Clear local history** removes all readings. The database uses the normal Windows user profile permissions; it is not separately encrypted. History follows this local profile, so clear it when switching Codex accounts if you want separate charts.
+Old `usage.db` files and backups from earlier versions are no longer read or updated; existing files are left in place. Updating the EXE continues to preserve preferences.
 
 The tracker has no direct HTTP client or telemetry endpoint. Codex itself contacts its services to retrieve quota; that connection is necessary for live readings.
-

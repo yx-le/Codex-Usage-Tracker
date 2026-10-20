@@ -10,8 +10,6 @@ namespace CodexUsageTracker.App;
 public sealed class TrackerController : IDisposable
 {
     private readonly string settingsPath;
-    private readonly AsyncUsageRepository repository;
-    private int historyVersion;
     private readonly CancellationTokenSource lifetime = new();
     private readonly AppServerSource server = new();
     private readonly AlertPolicy alerts = new();
@@ -41,7 +39,6 @@ public sealed class TrackerController : IDisposable
         settingsPath = Path.Combine(dataDirectory, "settings.json");
         Settings = TrackerSettings.Load(settingsPath, out var preferencesNotice); PreferencesNotice = preferencesNotice; App.ApplyTheme(Settings.Theme, Settings);
         ViewModel.Settings = Settings;
-        repository = new AsyncUsageRepository(Path.Combine(dataDirectory, "usage.db"));
         widget = new WidgetWindow(this); details = new DetailsWindow(this); edgeBar = new EdgeBarWindow(this); taskbar = new TaskbarStatusWindow(this);
         tray = new Forms.NotifyIcon { Text = "Codex Usage Tracker", Visible = true, Icon = Drawing.SystemIcons.Information };
         var menu = new RoundedTrayMenu
@@ -81,11 +78,8 @@ public sealed class TrackerController : IDisposable
         UpdateTray();
     }
 
-    public async void Start()
+    public void Start()
     {
-        // Restore persisted readings before the first fresh quota request.
-        await UpdateHistoryAsync();
-        if (disposed) return;
         timer.Start(); OnTick(null, EventArgs.Empty);
     }
     private async void OnTick(object? sender, EventArgs e)
@@ -146,7 +140,6 @@ public sealed class TrackerController : IDisposable
             foreach (var message in alerts.Evaluate(result.Item1, Settings, DateTimeOffset.UtcNow))
                 tray.ShowBalloonTip(7000, "Codex quota running low", message, Forms.ToolTipIcon.Warning);
             UpdateTray();
-            await UpdateHistoryAsync(result.Item1);
         }
         catch (OperationCanceledException) when (lifetime.IsCancellationRequested) { }
         finally { ViewModel.Busy = false; ViewModel.Notify(); }
@@ -203,7 +196,6 @@ public sealed class TrackerController : IDisposable
     {
         details.ShowUsagePage();
         PositionPanel(); details.Show(); PositionPanel(); details.Activate();
-        if (timer.IsEnabled) _ = UpdateHistoryAsync();
     }
     public void RepositionPanel() { if (details.IsVisible) PositionPanel(); }
     private void PositionPanel()
@@ -216,7 +208,8 @@ public sealed class TrackerController : IDisposable
         var work = new LayoutRect(area.Left / dpi.DpiScaleX, area.Top / dpi.DpiScaleY, area.Width / dpi.DpiScaleX, area.Height / dpi.DpiScaleY);
         var anchor = new LayoutRect(anchorWindow.Left, anchorWindow.Top, anchorWindow.Width, anchorWindow.Height);
         if (!anchorWindow.IsVisible) anchor = new LayoutRect(work.Right - 96, work.Bottom - 96, 96, 96);
-        var placement = PanelPlacement.Beside(work, anchor, 420, details.PreferredHeight(Math.Min(420, work.Width)));
+        var panelWidth = details.IsSettingsPage ? 420 : 360;
+        var placement = PanelPlacement.Beside(work, anchor, panelWidth, details.PreferredHeight(Math.Min(panelWidth, work.Width)));
         details.Width = placement.Width; details.Height = placement.Height;
         details.Left = placement.Left; details.Top = placement.Top;
     }
@@ -226,7 +219,7 @@ public sealed class TrackerController : IDisposable
     {
         if (PreferencesNotice.StartsWith("Saved preferences could not", StringComparison.Ordinal))
         { MessageBox.Show(PreferencesNotice, "Codex Usage Tracker"); return; }
-        try { Settings.Save(settingsPath); App.ApplyTheme(Settings.Theme, Settings); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme)); widget.Ring.InvalidateVisual(); details.Chart.InvalidateVisual(); edgeBar.Place(); ViewModel.Notify(); UpdateTray(); }
+        try { Settings.Save(settingsPath); App.ApplyTheme(Settings.Theme, Settings); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme)); widget.Ring.InvalidateVisual(); edgeBar.Place(); ViewModel.Notify(); UpdateTray(); }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException) { MessageBox.Show("Settings could not be saved. Check folder access.", "Codex Usage Tracker"); }
     }
     public bool TrySaveSettings(TrackerSettings candidate, out string error)
@@ -236,30 +229,10 @@ public sealed class TrackerController : IDisposable
         { error = "Settings could not be saved. Your edits are still here; check folder access and try again."; return false; }
         Settings = candidate; ViewModel.Settings = candidate; PreferencesNotice = "";
         App.ApplyTheme(Settings.Theme, Settings); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme));
-        widget.Ring.InvalidateVisual(); details.Chart.InvalidateVisual(); edgeBar.Place(); ViewModel.Notify(); UpdateTray();
+        widget.Ring.InvalidateVisual(); edgeBar.Place(); ViewModel.Notify(); UpdateTray();
         error = ""; return true;
     }
-    public Task ClearHistoryAsync() => UpdateHistoryAsync(clear: true);
-    private async Task UpdateHistoryAsync(UsageSnapshot? snapshot = null, bool clear = false)
-    {
-        var version = ++historyVersion;
-        try
-        {
-            var history = await (clear ? repository.ClearAsync(lifetime.Token)
-                : snapshot is not null ? repository.SaveAndReadAsync(snapshot, lifetime.Token)
-                : repository.ReadAsync(lifetime.Token));
-            if (disposed || version != historyVersion) return;
-            details.SetHistory(history); ViewModel.StorageStatus = ""; ViewModel.Notify();
-        }
-        catch (OperationCanceledException) when (lifetime.IsCancellationRequested) { }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException)
-        {
-            if (!disposed && version == historyVersion)
-            { ViewModel.StorageStatus = "History is temporarily unavailable. Check folder access or try again shortly."; ViewModel.Notify(); }
-            if (clear) throw;
-        }
-    }
-    private void OnSystemPreferenceChanged(object sender, UserPreferenceChangedEventArgs e) => Application.Current.Dispatcher.BeginInvoke(() => { App.ApplyTheme(Settings.Theme, Settings); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme)); widget.Ring.InvalidateVisual(); details.Chart.InvalidateVisual(); });
+    private void OnSystemPreferenceChanged(object sender, UserPreferenceChangedEventArgs e) => Application.Current.Dispatcher.BeginInvoke(() => { App.ApplyTheme(Settings.Theme, Settings); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme)); widget.Ring.InvalidateVisual(); });
     private void OnDisplayChanged(object? sender, EventArgs e) => Application.Current.Dispatcher.BeginInvoke(() => { widget.ClampPosition(); edgeBar.Place(); RepositionPanel(); });
 
     public void RenderPreview(string directory, string theme = "Dark")
@@ -271,13 +244,6 @@ public sealed class TrackerController : IDisposable
         ViewModel.Snapshot = new(now, "Preview · synthetic data", new(27, 300, now.AddHours(3)), new(58, 10080, now.AddDays(3)));
         ViewModel.SourceDetail = "PREVIEW · synthetic quota for layout verification";
         ViewModel.Notify(); widget.Show(); ShowDetails();
-        var previewHistory = Enumerable.Range(0, 2017).Where(i => i % 288 is < 100 or > 160).Select(i =>
-        {
-            var time = now.AddDays(-7).AddMinutes(i * 5);
-            return new UsageSnapshot(time, "Preview", new(i % 60 * 1.5, 300, time.AddMinutes((60 - i % 60) * 5)), new(8 + i * 50d / 2016, 10080, now.AddDays(3)));
-        }).ToArray();
-        ViewModel.Snapshot = previewHistory[^1] with { Source = "Preview · synthetic data" }; ViewModel.Notify();
-        details.SetHistory(previewHistory);
         Application.Current.Dispatcher.InvokeAsync(() =>
         {
             void Capture(string name, Window target)
@@ -289,8 +255,6 @@ public sealed class TrackerController : IDisposable
                 using var file = File.Create(Path.Combine(directory, name + ".png")); encoder.Save(file);
             }
             Capture("widget", widget); Capture("details", details);
-            details.Chart.Days = 7; details.Chart.InvalidateVisual(); Capture("details-week", details);
-            details.Chart.Days = 1; details.Chart.InvalidateVisual();
             var taskbarPreview = new System.Windows.Media.Imaging.PngBitmapEncoder();
             taskbarPreview.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(TaskbarStatusWindow.CreateQuotaIcon(ViewModel)));
             using (var iconFile = File.Create(Path.Combine(directory, "taskbar-status.png"))) taskbarPreview.Save(iconFile);

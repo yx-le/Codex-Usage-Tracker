@@ -45,20 +45,6 @@ public partial class DetailsWindow : Window
         var content = IsSettingsPage && SettingsHost.Content is SettingsPage settings
             ? (FrameworkElement)settings.FindName("SettingsContent") : UsageContent;
         content.Measure(new Size(Math.Max(1, width - 7), double.PositiveInfinity));
-        return Math.Max(IsSettingsPage ? 480 : 790, Math.Ceiling(content.DesiredSize.Height) + (IsSettingsPage ? 144 : 98));
-    }
-    public void SetHistory(IReadOnlyList<UsageSnapshot> samples) { Chart.Samples = samples; Chart.InvalidateVisual(); }
-    private void ShowDayHistory(object sender, RoutedEventArgs e) => SetHistoryRange(1);
-    private void ShowWeekHistory(object sender, RoutedEventArgs e) => SetHistoryRange(7);
-    private void SetHistoryRange(int days)
-    {
-        Chart.Days = days;
-        DayRange.SetResourceReference(BackgroundProperty, days == 1 ? "CardBrush" : "BackgroundBrush");
-        WeekRange.SetResourceReference(BackgroundProperty, days == 7 ? "CardBrush" : "BackgroundBrush");
-        DayRange.SetResourceReference(Control.ForegroundProperty, days == 1 ? "AccentBrush" : "TextBrush");
-        WeekRange.SetResourceReference(Control.ForegroundProperty, days == 7 ? "AccentBrush" : "TextBrush");
-        DayRange.FontWeight = days == 1 ? FontWeights.SemiBold : FontWeights.Normal;
-        WeekRange.FontWeight = days == 7 ? FontWeights.SemiBold : FontWeights.Normal;
-        Chart.InvalidateVisual();
+        return Math.Max(480, Math.Ceiling(content.DesiredSize.Height) + (IsSettingsPage ? 144 : 84));
     }
 }

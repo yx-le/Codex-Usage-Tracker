@@ -93,12 +93,4 @@ public partial class SettingsPage : UserControl
         catch (Exception error) when (error is IOException or UnauthorizedAccessException or System.Security.SecurityException)
         { Startup.IsChecked = StartupRegistration.IsEnabled; Validation.Text = "Could not change startup. Check your Windows permissions and try again."; }
     }
-    private async void ClearHistory(object sender, RoutedEventArgs e)
-    {
-        var button = (Button)sender; button.IsEnabled = false;
-        try { await controller.ClearHistoryAsync(); Validation.Text = "Local history cleared. New readings will start a fresh history."; }
-        catch (Exception error) when (error is Microsoft.Data.Sqlite.SqliteException or IOException or UnauthorizedAccessException)
-        { Validation.Text = "History could not be cleared. Check folder access or try again shortly."; }
-        finally { button.IsEnabled = true; }
-    }
 }

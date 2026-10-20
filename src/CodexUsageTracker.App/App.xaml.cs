@@ -36,16 +36,20 @@ public partial class App : Application
             if (e.Args.Length == 2 && e.Args[0] == "--settings-report")
                 File.WriteAllText(e.Args[1], System.Text.Json.JsonSerializer.Serialize(controller.Settings));
             if (preview) controller.RenderPreview(Path.GetFullPath(e.Args[1]), e.Args.Length >= 3 ? e.Args[2] : "Dark");
-            else { controller.Start(); if (StartupRegistration.IsEnabled) StartupRegistration.EnsureWatcher(); }
+            else
+            {
+                controller.Start();
+                if (StartupRegistration.IsEnabled) StartupRegistration.EnsureWatcher();
+            }
         }
-        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException)
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
             if (e.Args.Length >= 2 && e.Args[0] == "--render-preview")
             {
                 File.WriteAllText(Path.Combine(e.Args[1], "preview-error.txt"), exception.ToString());
                 Shutdown(1); return;
             }
-            MessageBox.Show("The tracker cannot access its local settings or history. Check access to %LOCALAPPDATA%\\CodexUsageTracker.", "Codex Usage Tracker");
+            MessageBox.Show("The tracker cannot access its local settings. Check access to %LOCALAPPDATA%\\CodexUsageTracker.", "Codex Usage Tracker");
             Shutdown(1);
         }
     }

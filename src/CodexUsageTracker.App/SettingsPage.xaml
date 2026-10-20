@@ -112,18 +112,13 @@
           </TabItem>
           <TabItem Header="Advanced">
             <StackPanel>
-              <TextBlock Text="Connection and local data" Style="{StaticResource SectionTitle}"/>
+              <TextBlock Text="Connection" Style="{StaticResource SectionTitle}"/>
               <Border Style="{StaticResource Card}"><StackPanel>
                 <TextBlock Text="Codex executable" FontWeight="SemiBold"/>
                 <TextBlock Text="Leave blank to find Codex automatically." Style="{StaticResource Caption}"/>
                 <TextBox x:Name="Executable" Margin="0,12,0,0" AutomationProperties.Name="Codex executable path"/>
                 <Button Content="Browse…" Click="Browse" HorizontalAlignment="Left" Margin="0,8,0,0"/>
                 <TextBlock Text="Uses your existing sign-in. No API key required." Style="{StaticResource Caption}" Margin="0,12,0,0"/>
-              </StackPanel></Border>
-              <Border Style="{StaticResource Card}"><StackPanel>
-                <TextBlock Text="Local history" FontWeight="SemiBold"/>
-                <TextBlock Text="Quota readings stay on this PC for 7 days. No telemetry, browser cookies, prompts, or responses are stored." Style="{StaticResource Caption}"/>
-                <Button Content="Clear local history" Click="ClearHistory" HorizontalAlignment="Left" Margin="0,14,0,0"/>
               </StackPanel></Border>
             </StackPanel>
           </TabItem>

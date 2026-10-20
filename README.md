@@ -1,8 +1,8 @@
 # Codex Usage Tracker
 
-**Know what is left before you hit a limit.** A lightweight Windows companion that shows your remaining Codex quota, reset times, and recent usage.
+**Know what is left before you hit a limit.** A lightweight Windows companion that shows your remaining Codex quota and reset times.
 
-Windows 10/11 x64 · C# / .NET 8 / WPF · Local history · No API key
+Windows 10/11 x64 · C# / .NET 8 / WPF · No history recording · No API key
 
 [Get started](#get-started) · [Choose your display](#choose-your-display) · [Read the numbers](#read-the-numbers) · [Privacy](#privacy) · [Build from source](docs/DEVELOPMENT.md)
 
@@ -38,7 +38,6 @@ If the tray icon is hidden, open Windows’ overflow menu beside the clock. If t
 
 **Percentages show quota remaining, not quota consumed.** For example, **73% remaining means 27% used**. Five-hour and weekly quotas are separate; each has its own reset time.
 
-<img src="docs/images/reading-guide.png" width="1280" alt="Annotated reading guide beside the actual details panel: compare both limits, check reset countdowns, understand pace, and inspect seven-day history and source freshness." />
 
 | Signal | Meaning |
 | --- | --- |
@@ -51,15 +50,9 @@ If the tray icon is hidden, open Windows’ overflow menu beside the clock. If t
 
 Warning thresholds are configurable. At 0%, a red outline or track keeps the warning visible even though no allowance remains. The exact percentage is the value to read.
 
-The panel also shows a **pace estimate**, **seven days of local history**, and the **source and last-update time**. Pace is an estimate based on elapsed time and usage so far, not a prediction of future work.
+The compact panel shows only what you need: **5-hour and weekly quota remaining**, reset countdowns, exact reset dates, and the last-update status. Low-quota warnings remain visible. Refresh manually at any time; the tracker also refreshes automatically when a reset is due.
 
-### A clearer usage history
-
-The history card gives **5-hour** and **weekly** quota their own charts. It opens on the **last 24 hours** so recent changes are easy to follow; choose **7d** for the full week. Hover over a recorded point for its exact remaining percentage and local time.
-
-<img src="docs/images/history-chart.png" width="420" alt="Example 24-hour quota history: a separate teal five-hour chart and lavender weekly chart, both labelled from zero to 100 percent remaining. Solid lines stop at resets and missing readings." />
-
-*Illustration uses synthetic readings.* Solid lines connect recorded values within the same quota window. Resets and gaps longer than 30 minutes leave breaks instead of drawing misleading connecting lines. A stronger backdrop keeps the charts readable over a busy desktop in light and dark themes.
+**No charts or history recording.** Quota readings are kept in memory only. Hover over the status area for data-source details.
 
 ## Everyday behavior
 
@@ -81,7 +74,7 @@ The history card gives **5-hour** and **weekly** quota their own charts. It open
 <details>
 <summary>Detailed panel over a workspace</summary>
 
-<img src="docs/images/details.png" width="1280" alt="The translucent details panel over an illustrative workspace, showing remaining quota, resets, history, and source information." />
+<img src="docs/images/details.png" width="1280" alt="The translucent details panel over an illustrative workspace, showing only remaining quota, reset times, and last-update status." />
 
 </details>
 
@@ -91,18 +84,16 @@ Illustrations use actual app renders with synthetic values. Desktop scenes and t
 
 **No browser cookies, API key, tracker telemetry, or prompt/response storage.** Source priority is **Codex app-server → local Codex fallback → N/A**. Missing data is never treated as zero usage or a confirmed refill.
 
-Quota readings and preferences stay in `%LOCALAPPDATA%\CodexUsageTracker`. History is retained for seven days and can be cleared in Settings. The fallback scans existing local session records to find quota fields; it does not retain their conversation content. Codex itself contacts its services for live readings.
+Only preferences are saved in `%LOCALAPPDATA%\CodexUsageTracker`. Quota readings are not saved or recorded. The fallback scans existing local session records to find quota fields; it does not retain their conversation content. Codex itself contacts its services for live readings.
 
 [Data handling, retention, and source details](docs/DATA-AND-PRIVACY.md)
 
 ## Development and limitations
 
-The app has **83 automated tests** and has been built and checked on Windows 11 x64. Windows 10 is targeted but has not been tested on a separate machine. Multi-monitor placement has automated layout coverage; physical multi-monitor testing remains limited.
+The app has **77 automated tests** and has been built and checked on Windows 11 x64. Windows 10 is targeted but has not been tested on a separate machine. Multi-monitor placement has automated layout coverage; physical multi-monitor testing remains limited.
 
-A background `codex.exe` counts as running, even if its window is closed. Windows may suppress notification balloons. History follows the local Windows profile, so clear it when switching Codex accounts if you want separate charts. There is no automatic updater or taskbar injection.
+A background `codex.exe` counts as running, even if its window is closed. Windows may suppress notification balloons. There is no automatic updater or taskbar injection.
 
 [Build, test, and preview](docs/DEVELOPMENT.md) · [Architecture](docs/ARCHITECTURE.md) · [Rebuild README illustrations](docs/render-readme.ps1)
 
 This is an independent utility, not an official OpenAI product.
-
-History uses separate charts with straight line segments, time/date labels, hover readings, and a latest-value marker. Missing readings leave gaps; quota resets begin a new segment. Choose 24h or 7d to change the visible period. Reset details show both a countdown and the exact local date/time with UTC offset. Saved history stays in the Windows user profile through portable updates, with a SQLite recovery backup; the retention window remains seven days.

@@ -8,7 +8,6 @@ public sealed class TrackerViewModel : INotifyPropertyChanged
     public string SourceDetail { get; set; } = "Connecting to Codex…";
     public bool Busy { get; set; }
     public bool CodexRunning { get; set; }
-    public string StorageStatus { get; set; } = "";
     public TrackerSettings Settings { get; set; } = new();
     public QuotaStatus FiveStatus => QuotaStatusPolicy.Evaluate(Snapshot.FiveHour, Snapshot.IsStale(Now), Settings, Now);
     public QuotaStatus WeekStatus => QuotaStatusPolicy.Evaluate(Snapshot.Weekly, Snapshot.IsStale(Now), Settings, Now);
@@ -61,8 +60,6 @@ public sealed class TrackerViewModel : INotifyPropertyChanged
     public string WeekReset => Snapshot.Weekly?.Countdown(Now) ?? "Reset time unavailable";
     public string FiveResetDate => Snapshot.FiveHour?.ResetDateTime() ?? "Reset date unavailable";
     public string WeekResetDate => Snapshot.Weekly?.ResetDateTime() ?? "Reset date unavailable";
-    public string FivePace => Snapshot.IsStale(Now) ? "Pace unavailable · stale data" : PaceCalculator.Describe(Snapshot.FiveHour, Now);
-    public string WeekPace => Snapshot.IsStale(Now) ? "Pace unavailable · stale data" : PaceCalculator.Describe(Snapshot.Weekly, Now);
     public string Status => !Snapshot.HasData ? "N/A" : Snapshot.Source.StartsWith("Preview", StringComparison.Ordinal) ? "DEMO" : Snapshot.IsStale(Now) ? "STALE" : Snapshot.FiveHour?.HasExpired(Now) == true || Snapshot.Weekly?.HasExpired(Now) == true ? "RESET DUE" : Snapshot.Source == "Codex app-server" ? "LIVE" : "LOCAL";
     public string LastUpdated => !Snapshot.HasData ? "No quota reading yet" : $"Last reading {Snapshot.ObservedAt.ToLocalTime():ddd HH:mm:ss} · {(int)Math.Max(0, (Now - Snapshot.ObservedAt).TotalMinutes)}m ago";
     public string Connection => CodexRunning ? "Codex is running" : "Codex is not running";
