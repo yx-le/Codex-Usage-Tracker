@@ -11,13 +11,26 @@ function Box($x,$y,$width,$height,$color) {
     $brush=[Drawing.SolidBrush]::new([Drawing.ColorTranslator]::FromHtml($color))
     $canvas.FillRectangle($brush,$x,$y,$width,$height); $brush.Dispose()
 }
+function RoundedBox($x,$y,$width,$height,$radius,$color) {
+    $path=[Drawing.Drawing2D.GraphicsPath]::new()
+    $d=$radius*2
+    $path.AddArc($x,$y,$d,$d,180,90)
+    $path.AddArc(($x+$width-$d),$y,$d,$d,270,90)
+    $path.AddArc(($x+$width-$d),($y+$height-$d),$d,$d,0,90)
+    $path.AddArc($x,($y+$height-$d),$d,$d,90,90)
+    $path.CloseFigure()
+    $brush=[Drawing.SolidBrush]::new([Drawing.ColorTranslator]::FromHtml($color))
+    $canvas.FillPath($brush,$path); $brush.Dispose(); $path.Dispose()
+}
 function Picture($file,$x,$y,$width,$height) {
     $source=[Drawing.Image]::FromFile((Join-Path $imageRoot $file))
     $canvas.DrawImage($source,[Drawing.Rectangle]::new($x,$y,$width,$height)); $source.Dispose()
 }
-function BeginImage($height) {
-    $script:bitmap=[Drawing.Bitmap]::new(1280,$height)
+function BeginImage($height,$scale=1) {
+    $script:bitmap=[Drawing.Bitmap]::new((1280*$scale),($height*$scale))
     $script:canvas=[Drawing.Graphics]::FromImage($bitmap)
+    $canvas.ScaleTransform($scale,$scale)
+    if ($scale -gt 1) { $canvas.SmoothingMode=[Drawing.Drawing2D.SmoothingMode]::AntiAlias }
     $canvas.Clear([Drawing.ColorTranslator]::FromHtml('#101923'))
     $canvas.TextRenderingHint=[Drawing.Text.TextRenderingHint]::AntiAliasGridFit
     $canvas.InterpolationMode=[Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
@@ -26,34 +39,32 @@ function EndImage($name) {
     $bitmap.Save((Join-Path $imageRoot $name),[Drawing.Imaging.ImageFormat]::Png)
     $canvas.Dispose(); $bitmap.Dispose()
 }
-BeginImage 720
-Text 'Your quota. Your choice of display.' 42 32 34 '#F5F8FB' $true
-Text 'Remaining allowance at a glance - details only when you need them.' 44 85 19
-Box 44 147 376 440 '#1B2936'; Box 452 147 376 440 '#1B2936'; Box 860 147 376 440 '#1B2936'
-Text 'Circle widget' 66 169 24 '#F5F8FB' $true
-Text 'A movable, always-on-top glance' 66 209 17
-Picture 'widget-closeup.png' 161 253 144 144
-Text 'Center: 5-hour remaining %' 66 436 18
-Text 'Outer ring: 5-hour  /  Inner: weekly' 66 470 17
-Text 'Drag anywhere. Click for details.' 66 523 17 '#9FB2C4'
-Text 'Slim edge bar' 474 169 24 '#F5F8FB' $true
-Text 'Two quotas, very little screen space' 474 209 17
-Picture 'edge-top.png' 492 270 264 56
-Picture 'edge-side.png' 510 351 28 132
-Text 'Upright numbers at the sides' 560 366 16
-Text 'Only 28 DIPs wide' 560 396 16 '#79C8B6'
-Text '75% transparent background' 474 470 17
-Text 'Drag to an edge. It adapts.' 474 523 17 '#9FB2C4'
-Text 'System tray' 882 169 24 '#F5F8FB' $true
-Text 'Always within reach' 882 209 17
-Box 904 276 286 90 '#263746'
-Text '●' 930 290 35 '#79C8B6'
-Text 'Quota status' 990 310 18 '#F5F8FB'
-Text 'Click to open quota details' 882 436 18
-Text 'Right-click for quick actions' 882 470 17
-Text 'No separate taskbar button.' 882 523 17 '#9FB2C4'
-Text 'Circle + edge bar: choose either, both, or neither.' 44 615 23 '#F5F8FB' $true
-Text 'Widget and bar use actual app renders. Tray placement is illustrative.' 44 669 15 '#94A8BB'
+BeginImage 872 2
+Text 'Small presence. Clear quota.' 48 40 38 '#F5F8FB' $true
+Text 'Choose how your remaining allowance stays in view.' 50 100 19 '#A8B7C7'
+RoundedBox 48 160 568 594 22 '#1B2936'
+RoundedBox 640 160 592 594 22 '#1B2936'
+Text 'Circle widget' 80 186 26 '#F5F8FB' $true
+Text 'A movable glance at your remaining quota.' 80 226 17 '#A8B7C7'
+Text 'Slim edge bar' 672 186 26 '#F5F8FB' $true
+Text 'Adapts to the top or either side of your screen.' 672 226 17 '#A8B7C7'
+RoundedBox 80 270 504 394 16 '#15212C'
+Picture 'widget-closeup.png' 236 350 192 192
+Text '5-hour: center + outer ring' 158 582 17 '#79D8C0'
+Text 'Weekly: inner ring' 196 612 17 '#B0B9EB'
+Text 'Drag to move. Click for details.' 80 698 18 '#D5DFE9'
+RoundedBox 672 270 528 92 16 '#15212C'
+Text 'TOP EDGE' 696 305 12 '#A8B7C7' $true
+Picture 'edge-top.png' 860 288 264 56
+RoundedBox 672 378 528 286 16 '#15212C'
+Picture 'edge-side.png' 708 389 56 264
+Text 'SIDE EDGE' 812 420 12 '#A8B7C7' $true
+Text 'Numbers stay upright.' 812 454 20 '#F5F8FB'
+Text '28 DIPs wide in the app.' 812 492 17 '#79D8C0'
+Text 'Drag to snap and adapt.' 812 574 17 '#A8B7C7'
+Text 'Click either bar for details.' 672 698 18 '#D5DFE9'
+Text 'Circle, edge bar, or both. System tray always available.' 50 788 21 '#F5F8FB' $true
+Text 'Actual app renders with synthetic quota. All previews enlarged to the same scale.' 50 832 14 '#93A7BA'
 EndImage 'display-guide.png'
 
 BeginImage 960

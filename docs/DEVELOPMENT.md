@@ -35,7 +35,7 @@ dotnet run --project src/CodexUsageTracker.App -- --render-preview "C:\temp\trac
 
 Use `Light` for the second theme. The preview creates isolated temporary settings beside its images. Close a running tracker first because the app is single-instance.
 
-Edge-bar previews render at **4× native resolution** so README close-ups stay sharp. Use these high-resolution assets when rebuilding the illustrations; do not enlarge a native-size screenshot.
+Circle and edge-bar previews render at **4× native resolution** so README close-ups stay sharp. The display guide presents all three previews at the same enlargement and exports at 2× resolution for sharp text. Use the high-resolution assets when rebuilding the illustrations; do not enlarge a native-size screenshot.
 
 ## Project structure
 

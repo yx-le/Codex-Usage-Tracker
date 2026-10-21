@@ -254,7 +254,7 @@ public sealed class TrackerController : IDisposable
                 var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder(); encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(image));
                 using var file = File.Create(Path.Combine(directory, name + ".png")); encoder.Save(file);
             }
-            Capture("widget", widget); Capture("details", details);
+            Capture("widget", widget, 4); Capture("details", details);
             PreviewScene.Save(Path.Combine(directory, "widget-context.png"), widget, false);
             PreviewScene.Save(Path.Combine(directory, "details-context.png"), details, true);
             foreach (var edge in new[] { "Top", "Left", "Right" }) { Settings.Edge = edge; edgeBar.Place(); edgeBar.Show(); edgeBar.Place(); Capture("edge-" + edge, edgeBar, 4); }
