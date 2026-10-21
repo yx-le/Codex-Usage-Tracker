@@ -246,10 +246,10 @@ public sealed class TrackerController : IDisposable
         ViewModel.Notify(); widget.Show(); ShowDetails();
         Application.Current.Dispatcher.InvokeAsync(() =>
         {
-            void Capture(string name, Window target)
+            void Capture(string name, Window target, double scale = 1)
             {
                 target.UpdateLayout();
-                var image = new System.Windows.Media.Imaging.RenderTargetBitmap((int)target.ActualWidth, (int)target.ActualHeight, 96, 96, PixelFormats.Pbgra32);
+                var image = new System.Windows.Media.Imaging.RenderTargetBitmap((int)Math.Ceiling(target.ActualWidth * scale), (int)Math.Ceiling(target.ActualHeight * scale), 96 * scale, 96 * scale, PixelFormats.Pbgra32);
                 image.Render(target);
                 var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder(); encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(image));
                 using var file = File.Create(Path.Combine(directory, name + ".png")); encoder.Save(file);
@@ -257,7 +257,7 @@ public sealed class TrackerController : IDisposable
             Capture("widget", widget); Capture("details", details);
             PreviewScene.Save(Path.Combine(directory, "widget-context.png"), widget, false);
             PreviewScene.Save(Path.Combine(directory, "details-context.png"), details, true);
-            foreach (var edge in new[] { "Top", "Left", "Right" }) { Settings.Edge = edge; edgeBar.Place(); edgeBar.Show(); edgeBar.Place(); Capture("edge-" + edge, edgeBar); }
+            foreach (var edge in new[] { "Top", "Left", "Right" }) { Settings.Edge = edge; edgeBar.Place(); edgeBar.Show(); edgeBar.Place(); Capture("edge-" + edge, edgeBar, 4); }
             edgeBar.Hide(); Settings.Edge = "Top";
             var windowCount = Application.Current.Windows.Count;
             details.ShowSettingsPage(); Capture("settings", details);
