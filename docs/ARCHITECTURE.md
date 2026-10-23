@@ -2,6 +2,8 @@
 
 `TrackerController` owns the WPF windows, tray icon, one-second UI timer, 60-second read cadence, cancellation, and preference persistence. Quota reads run away from the UI thread and never overlap. Process discovery is paused during a quota read so its temporary `codex.exe` cannot create its own visibility trigger. Disposal cancels the active request and releases tray icon handles and system events.
 
+Optional circle and edge windows are created only when first used. Opening the tray panel, saving preferences, or receiving a display/theme event does not create disabled indicators. The details panel is prepared at startup to keep its first opening responsive. The one-second timer still detects process and reset changes, but only invalidates bindings when displayed countdown, freshness, status, or running state changes; completed reads and preference changes update immediately. There is no forced garbage collection, working-set trimming, or slower refresh cadence.
+
 `AppServerSource` is a short-lived stdio JSON-RPC client. It accepts only its matching response IDs, discards server diagnostics, limits request duration, and closes its own child process tree. It never drives a Codex conversation. `LocalCodexSource` is a bounded best-effort reader, and `QuotaParser` handles camel-case API fields and snake-case local quota fields. Unknown shapes degrade to N/A.
 
 `UsageSnapshot` and `QuotaWindow` carry only observation time, source, percentages, durations, and reset times. The current reading lives in memory only. The desktop app has no history store, database dependency, or chart.

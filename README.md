@@ -63,6 +63,7 @@ Warning thresholds are configurable. An exhausted quota keeps a visible warning 
 ## Everyday controls
 
 - **Refresh:** automatic checks about every 60 seconds while Codex runs; additional checks when a reset is due. Manual refresh is available in the panel and tray menu.
+- **Resource use:** disabled indicators are created only when needed, and unchanged UI does not rebind every second. Refresh timing stays the same.
 - **Appearance:** Light, Dark, or System theme. Adjust transparency separately for the circle, edge bar, and panel. Positions and preferences are remembered.
 - **Navigation:** click an indicator to toggle details. Settings opens within the same panel. Escape returns from Settings, then closes the panel.
 - **Startup:** the watcher checks for Codex every two seconds. Quit stops the tracker for the current Codex session; a later Codex restart can launch it again. Disable automatic launch in Settings to stop the watcher.

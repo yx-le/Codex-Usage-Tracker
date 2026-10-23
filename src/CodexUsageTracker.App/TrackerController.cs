@@ -21,10 +21,13 @@ public sealed class TrackerController : IDisposable
     private readonly Forms.ToolStripMenuItem trayEdge;
     private readonly Forms.NotifyIcon tray;
     private readonly DispatcherTimer timer;
-    private readonly WidgetWindow widget;
-    private readonly EdgeBarWindow edgeBar;
+    private readonly Lazy<WidgetWindow> widgetWindow;
+    private readonly Lazy<EdgeBarWindow> edgeWindow;
     private bool edgeAnchor;
     private readonly DetailsWindow details;
+    private WidgetWindow widget => widgetWindow.Value;
+    private EdgeBarWindow edgeBar => edgeWindow.Value;
+    private string lastDisplayState = "";
     private DateTimeOffset lastAttempt = DateTimeOffset.MinValue;
     private bool disposed, lastRunning;
     private Drawing.Icon? ownedIcon;
@@ -38,7 +41,10 @@ public sealed class TrackerController : IDisposable
         settingsPath = Path.Combine(dataDirectory, "settings.json");
         Settings = TrackerSettings.Load(settingsPath, out var preferencesNotice); PreferencesNotice = preferencesNotice; App.ApplyTheme(Settings.Theme, Settings);
         ViewModel.Settings = Settings;
-        widget = new WidgetWindow(this); details = new DetailsWindow(this); edgeBar = new EdgeBarWindow(this);
+        widgetWindow = new(() => new WidgetWindow(this));
+        edgeWindow = new(() => new EdgeBarWindow(this));
+        // Prepare the panel before the first click; only optional displays are deferred.
+        details = new DetailsWindow(this);
         tray = new Forms.NotifyIcon { Text = "Codex Usage Tracker", Visible = true, Icon = Drawing.SystemIcons.Information };
         var menu = new RoundedTrayMenu
         {
@@ -89,13 +95,14 @@ public sealed class TrackerController : IDisposable
         var running = ViewModel.CodexRunning;
         if (Settings.FloatingWidget && (!Settings.OnlyWhileCodexRunning || running))
         { if (!widget.IsVisible) widget.Show(); }
-        else widget.Hide();
+        else if (widgetWindow.IsValueCreated) widget.Hide();
         if (Settings.EdgeBar && (!Settings.OnlyWhileCodexRunning || running))
         { if (!edgeBar.IsVisible) { edgeBar.Place(); edgeBar.Show(); edgeBar.Place(); } }
-        else edgeBar.Hide();
+        else if (edgeWindow.IsValueCreated) edgeBar.Hide();
         if (Settings.OnlyWhileCodexRunning && !running && lastRunning) details.Hide();
         var justStarted = running && !lastRunning; lastRunning = running;
-        ViewModel.Notify();
+        var displayState = $"{ViewModel.FiveReset}|{ViewModel.WeekReset}|{ViewModel.LastUpdated}|{ViewModel.Status}|{running}";
+        if (displayState != lastDisplayState) { lastDisplayState = displayState; ViewModel.Notify(); }
         UpdateTray();
         if (ViewModel.Busy) return;
         var now = DateTimeOffset.UtcNow;
@@ -197,17 +204,19 @@ public sealed class TrackerController : IDisposable
     public void RepositionPanel() { if (details.IsVisible) PositionPanel(); }
     private void PositionPanel()
     {
-        Window anchorWindow = edgeBar.IsVisible && (edgeAnchor || !widget.IsVisible) ? edgeBar : widget;
+        var useEdge = edgeWindow.IsValueCreated && edgeBar.IsVisible &&
+            (edgeAnchor || !widgetWindow.IsValueCreated || !widget.IsVisible);
+        Window anchorWindow = useEdge ? edgeBar : widgetWindow.IsValueCreated ? widget : details;
         var dpi = VisualTreeHelper.GetDpi(anchorWindow);
         var handle = new System.Windows.Interop.WindowInteropHelper(anchorWindow).Handle;
         var screen = handle != IntPtr.Zero ? Forms.Screen.FromHandle(handle) : Forms.Screen.PrimaryScreen!;
         var area = screen.WorkingArea;
         var work = new LayoutRect(area.Left / dpi.DpiScaleX, area.Top / dpi.DpiScaleY, area.Width / dpi.DpiScaleX, area.Height / dpi.DpiScaleY);
         var anchor = new LayoutRect(anchorWindow.Left, anchorWindow.Top, anchorWindow.Width, anchorWindow.Height);
-        if (!anchorWindow.IsVisible) anchor = new LayoutRect(work.Right - 96, work.Bottom - 96, 96, 96);
+        if (anchorWindow == details || !anchorWindow.IsVisible) anchor = new LayoutRect(work.Right - 96, work.Bottom - 96, 96, 96);
         var panelWidth = details.IsSettingsPage ? 420 : 360;
         var panelHeight = details.PreferredHeight(Math.Min(panelWidth, work.Width));
-        var placement = anchorWindow == edgeBar
+        var placement = useEdge
             ? PanelPlacement.FromEdgeBar(work, anchor, Settings.Edge, panelWidth, panelHeight)
             : PanelPlacement.Beside(work, anchor, panelWidth, panelHeight);
         details.Width = placement.Width; details.Height = placement.Height;
@@ -219,7 +228,7 @@ public sealed class TrackerController : IDisposable
     {
         if (PreferencesNotice.StartsWith("Saved preferences could not", StringComparison.Ordinal))
         { MessageBox.Show(PreferencesNotice, "Codex Usage Tracker"); return; }
-        try { Settings.Save(settingsPath); App.ApplyTheme(Settings.Theme, Settings); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme)); widget.Ring.InvalidateVisual(); edgeBar.Place(); ViewModel.Notify(); UpdateTray(); }
+        try { Settings.Save(settingsPath); ApplyWindowSettings(); ViewModel.Notify(); UpdateTray(); }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException) { MessageBox.Show("Settings could not be saved. Check folder access.", "Codex Usage Tracker"); }
     }
     public bool TrySaveSettings(TrackerSettings candidate, out string error)
@@ -228,12 +237,23 @@ public sealed class TrackerController : IDisposable
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         { error = "Settings could not be saved. Your edits are still here; check folder access and try again."; return false; }
         Settings = candidate; ViewModel.Settings = candidate; PreferencesNotice = "";
-        App.ApplyTheme(Settings.Theme, Settings); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme));
-        widget.Ring.InvalidateVisual(); edgeBar.Place(); ViewModel.Notify(); UpdateTray();
+        ApplyWindowSettings(); ViewModel.Notify(); UpdateTray();
         error = ""; return true;
     }
-    private void OnSystemPreferenceChanged(object sender, UserPreferenceChangedEventArgs e) => Application.Current.Dispatcher.BeginInvoke(() => { App.ApplyTheme(Settings.Theme, Settings); GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme)); widget.Ring.InvalidateVisual(); });
-    private void OnDisplayChanged(object? sender, EventArgs e) => Application.Current.Dispatcher.BeginInvoke(() => { widget.ClampPosition(); edgeBar.Place(); RepositionPanel(); });
+    private void ApplyWindowSettings()
+    {
+        App.ApplyTheme(Settings.Theme, Settings);
+        GlassWindow.Apply(details, App.IsDarkTheme(Settings.Theme));
+        if (widgetWindow.IsValueCreated) widget.Ring.InvalidateVisual();
+        if (edgeWindow.IsValueCreated) edgeBar.Place();
+    }
+    private void OnSystemPreferenceChanged(object sender, UserPreferenceChangedEventArgs e) => Application.Current.Dispatcher.BeginInvoke(ApplyWindowSettings);
+    private void OnDisplayChanged(object? sender, EventArgs e) => Application.Current.Dispatcher.BeginInvoke(() =>
+    {
+        if (widgetWindow.IsValueCreated) widget.ClampPosition();
+        if (edgeWindow.IsValueCreated) edgeBar.Place();
+        RepositionPanel();
+    });
 
     public void RenderPreview(string directory, string theme = "Dark")
     {
